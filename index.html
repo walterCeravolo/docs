@@ -247,6 +247,7 @@ kbd { font: 12px ui-monospace, Menlo, Consolas, monospace; border: 1px solid var
 .p-det { width: 100%; margin-top: 4px; text-align: left; }
 .p-det summary { cursor: pointer; text-align: center; color: rgba(255, 255, 255, .75); font-size: 13.5px; padding: 6px; }
 .p-pre { white-space: pre-wrap; word-break: break-all; font: 11.5px/1.45 ui-monospace, Menlo, Consolas, monospace; max-height: 34vh; overflow: auto; background: rgba(255, 255, 255, .08); border-radius: 8px; padding: 10px; margin: 6px 0 0; color: #e6e9ee; user-select: text; -webkit-user-select: text; touch-action: pan-y; }
+.p-note { position: absolute; left: 50%; bottom: calc(env(safe-area-inset-bottom, 0px) + 110px); transform: translateX(-50%); background: rgba(0, 0, 0, .7); color: #fff; border-radius: 8px; padding: 8px 14px; font-size: 13px; max-width: 86vw; text-align: center; pointer-events: none; z-index: 1; }
 .p-zap { position: absolute; top: calc(env(safe-area-inset-top, 0px) + 72px); left: 50%; transform: translateX(-50%); background: rgba(0, 0, 0, .7); border-radius: 10px; padding: 10px 16px; font-size: 15px; font-weight: 500; pointer-events: none; max-width: 80vw; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .p-cast { position: absolute; inset: 0; display: grid; place-items: center; text-align: center; color: rgba(255, 255, 255, .85); padding: 24px; }
 .p-cast .i { width: 56px; height: 56px; margin: 0 auto 10px; }
@@ -286,6 +287,7 @@ kbd { font: 12px ui-monospace, Menlo, Consolas, monospace; border: 1px solid var
   <video id="video" playsinline webkit-playsinline preload="auto"></video>
   <div class="p-cast" id="pCastInfo" hidden></div>
   <div class="p-spin" id="pSpin" hidden><i></i></div>
+  <div class="p-note" id="pNote" hidden></div>
   <div class="p-ui" id="pUi">
     <div class="p-top">
       <button class="ib" id="pBack" type="button" aria-label="Chiudi il lettore"></button>
@@ -1006,6 +1008,7 @@ function channelSheet(ch) {
     { icon: isFav(ch) ? "star" : "starO", label: isFav(ch) ? "Togli dai preferiti" : "Aggiungi ai preferiti", run: () => toggleFav(ch) },
   ];
   if (S.epg[ch.key] && S.epg[ch.key].length) items.push({ icon: "guide", label: "Guida TV", run: () => guideSheet(ch) });
+  if (!FRAMED && kindOf(ch.url) !== "file" && kindOf(ch.url) !== "dash") items.push({ icon: "tv", label: "Guarda con il decodificatore avanzato", run: () => openChannel(ch, true, true) });
   items.push({ icon: "ext", label: "Apri in un'altra app (VLC…)", run: () => openExternal(ch) });
   if (Cast.ready) items.push({ icon: "cast", label: "Trasmetti alla TV", run: () => castChannel(ch) });
   items.push({ icon: "copy", label: "Copia indirizzo del canale", run: () => copyText(ch.url) });
@@ -1072,10 +1075,153 @@ async function castChannel(ch) {
   } catch (e) { toast("La TV non riesce ad aprire questo canale"); }
 }
 
+// ======================= decodificatore avanzato (FFmpeg nel browser, come VLC) =======================
+// Quando il browser non sa leggere il formato di un canale HLS (audio Dolby AC-3/E-AC-3, audio MP2, video MPEG-2...),
+// ogni pezzo del canale passa da FFmpeg prima di arrivare al lettore: il video H.264 resta com'e', l'audio diventa AAC,
+// un video che il browser non legge viene convertito in H.264. Si usa sempre e solo l'indirizzo scritto nella lista.
+const DEC = { ff: null, loading: null, queue: Promise.resolve(), log: [], info: new Map(), seg: new Map(), keys: new Map(), maps: new Map() };
+const decBase = () => new URL("dec/", location.href).href;
+async function decLoad(note) {
+  if (DEC.ff) return DEC.ff;
+  if (!DEC.loading) DEC.loading = (async () => {
+    if (note) note("Carico il decodificatore avanzato (circa 10 MB, solo la prima volta)…");
+    await loadScript(decBase() + "ffmpeg.js");
+    const ff = new FFmpegWASM.FFmpeg();
+    ff.on("log", ({ message }) => { DEC.log.push(message); if (DEC.log.length > 300) DEC.log.splice(0, 150); });
+    await ff.load({ coreURL: decBase() + "ffmpeg-core.js", wasmURL: decBase() + "ffmpeg-core.wasm" });
+    DEC.ff = ff; return ff;
+  })().catch(e => { DEC.loading = null; throw e; });
+  return DEC.loading;
+}
+function decRun(fn) { const p = DEC.queue.then(fn, fn); DEC.queue = p.catch(() => {}); return p; }
+async function decTranscode(bytes, key) {
+  return decRun(async () => {
+    const ff = await decLoad();
+    await ff.writeFile("in.ts", bytes);
+    let info = DEC.info.get(key);
+    if (!info) {   // la prima volta si guarda cosa c'e' dentro il canale
+      // (-loglevel info esplicito: FFmpeg nel browser si ricorda il livello dei comandi precedenti)
+      DEC.log = []; try { await ff.exec(["-hide_banner", "-loglevel", "info", "-i", "in.ts"]); } catch (e) {}
+      const txt = DEC.log.join("\n"), st = txt.match(/Stream #\d+:\d+.*/g) || [];
+      info = { known: st.length > 0, vcopy: !/Video:/.test(txt) || /Video:\s*h264/i.test(txt), probe: st.join(" | ").slice(0, 400) };
+      if (info.known) DEC.info.set(key, info);
+    }
+    const args = ["-hide_banner", "-loglevel", "error", "-copyts", "-i", "in.ts"];
+    args.push("-map", "0:v:0?", ...(info.vcopy ? ["-c:v", "copy"] : ["-c:v", "libx264", "-preset", "ultrafast", "-tune", "zerolatency", "-crf", "30", "-vf", "scale=-2:min(ih\\,480)", "-pix_fmt", "yuv420p"]));
+    args.push("-map", "0:a:0?", "-c:a", "aac", "-b:a", "128k", "-ac", "2");
+    args.push("-muxdelay", "0", "-muxpreload", "0", "-f", "mpegts", "out.ts");
+    DEC.log = []; const rc = await ff.exec(args);
+    let out = null; try { out = await ff.readFile("out.ts"); } catch (e) {}
+    try { await ff.deleteFile("in.ts"); } catch (e) {} try { await ff.deleteFile("out.ts"); } catch (e) {}
+    if (rc !== 0 || !out || !out.length) throw new Error("conversione non riuscita (" + rc + ") " + DEC.log.slice(-3).join(" ").slice(0, 200));
+    return out;
+  });
+}
+function decIv(n) { const b = new Uint8Array(16); for (let i = 15; i >= 8 && n > 0; i--) { b[i] = n & 255; n = Math.floor(n / 256); } return b; }
+function decFixPlaylist(txt, base) {   // playlist per il decodificatore: niente codec dichiarati, cifratura e init gestite qui
+  if (!/#EXTM3U/.test(txt)) return txt;
+  const abs = u => { try { return new URL(u, base).href; } catch (e) { return u; } };
+  const out = []; let map = null, key = null, seq = 0, n = 0;
+  for (let line of txt.split(/\r?\n/)) {
+    if (/^#EXT-X-MEDIA-SEQUENCE:/.test(line)) seq = parseInt(line.split(":")[1], 10) || 0;
+    if (/^#EXT-X-STREAM-INF:/.test(line)) line = line.replace(/,?CODECS="[^"]*"/, "").replace(":,", ":");
+    if (/^#EXT-X-MAP:/.test(line)) { const m = /URI="([^"]+)"/.exec(line); map = m ? abs(m[1]) : null; continue; }
+    if (/^#EXT-X-KEY:/.test(line)) {
+      const meth = (/METHOD=([A-Z0-9-]+)/.exec(line) || [])[1];
+      if (meth === "NONE") { key = null; continue; }
+      if (meth === "AES-128") { const u = /URI="([^"]+)"/.exec(line), iv = /IV=0x([0-9a-f]+)/i.exec(line); key = { uri: u ? abs(u[1]) : "", iv: iv ? iv[1] : null }; continue; }
+    }
+    if (line && line[0] !== "#") {
+      const u = abs(line.trim());
+      if (map || key) DEC.seg.set(u, { map, key: key && { uri: key.uri, iv: key.iv ? Uint8Array.from(key.iv.padStart(32, "0").match(/../g).map(x => parseInt(x, 16))) : decIv(seq + n) } });
+      if (DEC.seg.size > 3000) DEC.seg.clear();
+      n++; out.push(u); continue;
+    }
+    out.push(line);
+  }
+  return out.join("\n");
+}
+async function decGet(url, cache) {
+  if (cache.has(url)) return cache.get(url);
+  const p = fetch(url, { cache: "no-store" }).then(r => { if (!r.ok) throw new Error("HTTP " + r.status); return r.arrayBuffer(); });
+  cache.set(url, p); p.catch(() => cache.delete(url)); if (cache.size > 20) cache.delete(cache.keys().next().value);
+  return p;
+}
+async function decSegment(url, data) {
+  const x = DEC.seg.get(url); let bytes = new Uint8Array(data);
+  if (x && x.key) {
+    const kb = await decGet(x.key.uri, DEC.keys);
+    const ck = await crypto.subtle.importKey("raw", kb, { name: "AES-CBC" }, false, ["decrypt"]);
+    bytes = new Uint8Array(await crypto.subtle.decrypt({ name: "AES-CBC", iv: x.key.iv }, ck, bytes));
+  }
+  if (x && x.map) { const init = new Uint8Array(await decGet(x.map, DEC.maps)), all = new Uint8Array(init.length + bytes.length); all.set(init); all.set(bytes, init.length); bytes = all; }
+  return bytes;
+}
+function decLoaders(token, key, onInfo) {
+  const Base = Hls.DefaultConfig.loader;
+  class PL extends Base {
+    load(ctx, cfg, cb) { super.load(ctx, cfg, Object.assign({}, cb, { onSuccess: (r, st, c, n) => { if (typeof r.data === "string") r.data = decFixPlaylist(r.data, r.url || c.url); cb.onSuccess(r, st, c, n); } })); }
+  }
+  class FL extends Base {
+    load(ctx, cfg, cb) {
+      this.dead = false;
+      super.load(ctx, cfg, Object.assign({}, cb, { onSuccess: (r, st, c, n) => {
+        decSegment(c.url, r.data).then(b => decTranscode(b, key)).then(out => {
+          if (this.dead || token !== P.token) return;
+          if (onInfo) onInfo(DEC.info.get(key));
+          r.data = out.buffer.slice(out.byteOffset, out.byteOffset + out.byteLength); st.loaded = out.byteLength;
+          cb.onSuccess(r, st, c, n);
+        }).catch(e => { if (this.dead || token !== P.token) return; P.decErr = String(e && e.message || e); cb.onError({ code: 0, text: "decodificatore: " + P.decErr }, c, null, st); });
+      } }));
+    }
+    abort() { this.dead = true; super.abort(); }
+    destroy() { this.dead = true; super.destroy(); }
+  }
+  return { PL, FL };
+}
+// Scheda tecnica di un pezzo MPEG-TS (tabelle PAT/PMT): quali tracce video e audio contiene davvero il canale.
+// Serve perche' il lettore del browser, davanti a un audio Dolby o a un video MPEG-2, non da' errore: li salta e basta.
+const TS_V = { 0x01: "MPEG-1", 0x02: "MPEG-2", 0x10: "MPEG-4", 0x1b: "H.264", 0x24: "HEVC", 0xea: "VC-1", 0x42: "AVS" };
+const TS_A = { 0x03: "MP1/MP2", 0x04: "MP2/MP3", 0x0f: "AAC", 0x11: "AAC-LATM", 0x81: "AC-3", 0x87: "E-AC-3" };
+function tsStreams(u8) {
+  let i = 0; while (i < 188 && !(u8[i] === 0x47 && (i + 188 >= u8.length || u8[i + 188] === 0x47))) i++;
+  if (i >= 188) return null;
+  let pmtPid = -1;
+  for (; i + 188 <= u8.length; i += 188) {
+    if (u8[i] !== 0x47) return null;
+    const pusi = u8[i + 1] & 0x40, pid = ((u8[i + 1] & 0x1f) << 8) | u8[i + 2], afc = (u8[i + 3] >> 4) & 3;
+    if (!pusi || afc === 2) continue;
+    let o = i + 4; if (afc === 3) o += 1 + u8[o]; o += 1 + u8[o];
+    if (o + 12 > i + 188) continue;
+    const len = ((u8[o + 1] & 0x0f) << 8) | u8[o + 2], end = Math.min(o + 3 + len - 4, i + 188);
+    if (pid === 0) { for (let q = o + 8; q + 4 <= end; q += 4) { const prog = (u8[q] << 8) | u8[q + 1]; if (prog) { pmtPid = ((u8[q + 2] & 0x1f) << 8) | u8[q + 3]; break; } } }
+    else if (pid === pmtPid) {
+      const r = { v: [], a: [] }, pil = ((u8[o + 10] & 0x0f) << 8) | u8[o + 11];
+      for (let q = o + 12 + pil; q + 5 <= end;) {
+        let t = u8[q]; const il = ((u8[q + 3] & 0x0f) << 8) | u8[q + 4];
+        if (t === 0x06) for (let d = q + 5; d + 1 < q + 5 + il; d += 2 + u8[d + 1]) { if (u8[d] === 0x6a) t = 0x81; else if (u8[d] === 0x7a) t = 0x87; }
+        if (TS_V[t]) r.v.push(TS_V[t]); else if (TS_A[t]) r.a.push(TS_A[t]);
+        q += 5 + il;
+      }
+      return r;
+    }
+  }
+  return null;
+}
+function missingTracks() {   // il canale ha una traccia che il browser ha saltato?
+  const m = P.pmt, t = P.hlsTracks; if (!m || !t) return "";
+  const out = []; if (m.v.length && !t.v) out.push("video " + m.v[0]); if (m.a.length && !t.a) out.push("audio " + m.a[0]);
+  return out.join(" e ");
+}
+const decChannels = () => new Set(store.get("decch", []));
+function decRemember(ch) { const s = decChannels(); if (!s.has(ch.key)) { s.add(ch.key); store.set("decch", [...s].slice(-200)); } }
+function note(t) { const n = $("pNote"); if (!n) return; n.textContent = t || ""; n.hidden = !t; }
+
 // ======================= lettore =======================
 const P = { list: [], idx: -1, ch: null, token: 0, hls: null, ts: null, dash: null, started: false, layer: null, hideT: 0, wake: null, retried: false, seeking: false };
 const video = $("video");
-function openChannel(ch, forceInternal) {
+function openChannel(ch, forceInternal, forceDec) {
+  P.forceDec = forceDec ? ch.key : null;
   if (CFG.player === "external" && !forceInternal && externalHref(ch)) { addRecent(ch); openExternal(ch); return; }
   const L = S.list.length && S.list.includes(ch) ? S.list : S.chans;
   openPlayer(L, L.indexOf(ch));
@@ -1091,7 +1237,7 @@ function openPlayer(list, idx) {
 }
 function closePlayer() { if (P.layer) closeLayer(P.layer); else closePlayerNow(); }
 function closePlayerNow() {
-  P.token++; stopEngines(); $("player").hidden = true; hideMsg(); $("pCastInfo").hidden = true; P.layer = null;
+  P.token++; stopEngines(); note(""); $("player").hidden = true; hideMsg(); $("pCastInfo").hidden = true; P.layer = null;
   try { if (document.fullscreenElement) document.exitFullscreen(); } catch (e) {}
   try { if (P.wake) P.wake.release(); } catch (e) {} P.wake = null;
   try { if (document.pictureInPictureElement) document.exitPictureInPicture(); } catch (e) {}
@@ -1146,10 +1292,35 @@ async function playIdx(idx) {
   // si usa solo l'indirizzo scritto nella lista M3U, cosi' com'e'
   const pl = plan(ch.url), steps = pl.steps;
   if (!steps.length) { spin(false); return showError(lastErr || { kind: "format" }, ch); }
-  for (const st of steps) {
+  // decodificatore avanzato: subito se chiesto o se questo canale ne ha gia' avuto bisogno, altrimenti dopo un «formato non supportato»
+  const hlsLike = steps.some(x => x.e === "hls") ? steps.find(x => x.e === "hls").url : null;
+  const decOk = !FRAMED && hlsLike && window.isSecureContext !== false;
+  if (decOk && (P.forceDec === ch.key || decChannels().has(ch.key))) steps.unshift({ e: "hlsx", url: hlsLike });
+  P.decErr = ""; P.decShown = false; P.decInfo = null;
+  for (let i = 0; i < steps.length; i++) {
+    const st = steps[i];
     if (token !== P.token) return;
-    try { await attempt(st, token, pl.proxied); if (token === P.token) { P.started = true; spin(false); updateSeek(); } return; }
-    catch (e) { if (token !== P.token) return; P.trace.push(Object.assign({ e: st.e, url: st.url }, e)); keep(e); stopEngines(); }
+    try {
+      P.pmt = null; P.pmtP = null; P.hlsTracks = null;
+      await attempt(st, token, pl.proxied);
+      if (token === P.token && st.e === "hls" && decOk) {   // parte, ma senza audio o senza video? allora formato non supportato
+        if (!P.pmt && P.pmtP) await Promise.race([P.pmtP, new Promise(r => setTimeout(r, 2500))]);
+        if (token !== P.token) return;
+        const miss = missingTracks();
+        if (miss) { if (st.e === "hls") await new Promise(r => setTimeout(r, 300)); throw { kind: "format", det: "il browser salta " + miss + " (" + [...P.pmt.v, ...P.pmt.a].join(", ") + ")" }; }
+      }
+      if (token === P.token) {
+        P.started = true; spin(false); updateSeek();
+        if (st.e === "hlsx") { decRemember(ch); note("Decodificatore avanzato attivo" + (P.decInfo && P.decInfo.probe ? "" : "")); setTimeout(() => { if (P.token === token) note(""); }, 4000); } else note("");
+      }
+      return;
+    }
+    catch (e) {
+      if (token !== P.token) return;
+      if (st.e === "hlsx" && P.decInfo) e.det = (e.det || "") + " · flussi: " + P.decInfo.probe;
+      P.trace.push(Object.assign({ e: st.e, url: st.url }, e)); keep(e); stopEngines(); note("");
+      if (decOk && e.kind === "format" && (st.e === "hls" || st.e === "native") && !steps.some(x => x.e === "hlsx")) steps.splice(i + 1, 0, { e: "hlsx", url: hlsLike });
+    }
   }
   spin(false); showError(lastErr || { kind: "unknown" }, ch);
 }
@@ -1161,14 +1332,37 @@ function attempt(st, token, proxied) {
     const onLoaded = () => { const p = video.play(); if (p && p.catch) p.catch(err => { if (err && err.name === "NotAllowedError") { setIcon($("pPlay"), "play"); showUi(true); ok(); } }); };
     const onPlaying = () => ok();
     const onErr = () => ko(classifyMedia(video.error, st.url));
-    const tm = setTimeout(() => ko({ kind: "timeout", det: "nessun video in 25 s" }), 25000);
+    const lim = st.e === "hlsx" ? 120000 : 25000;
+    const tm = setTimeout(() => ko({ kind: "timeout", det: "nessun video in " + lim / 1000 + " s" + (st.e === "hlsx" && P.decErr ? " · " + P.decErr : "") }), lim);
     function cleanup() { clearTimeout(tm); video.removeEventListener("loadeddata", onLoaded); video.removeEventListener("playing", onPlaying); video.removeEventListener("error", onErr); }
     video.addEventListener("loadeddata", onLoaded); video.addEventListener("playing", onPlaying); video.addEventListener("error", onErr);
     try {
-      if (st.e === "hls") {
+      if (st.e === "hls" || st.e === "hlsx") {
         await loadScript(LIB.hls); if (token !== P.token) return ko({ kind: "stale" });
         if (!window.Hls || !Hls.isSupported()) return ko({ kind: "format" });
-        const hls = new Hls({ enableWorker: true, backBufferLength: 30, manifestLoadingMaxRetry: 1, levelLoadingMaxRetry: 2, fragLoadingMaxRetry: 3, xhrSetup: proxied ? (xhr, u) => { xhr.open("GET", proxify(u), true); } : undefined });
+        const opts = { enableWorker: true, backBufferLength: 30, manifestLoadingMaxRetry: 1, levelLoadingMaxRetry: 2, fragLoadingMaxRetry: 3, xhrSetup: proxied ? (xhr, u) => { xhr.open("GET", proxify(u), true); } : undefined };
+        if (st.e === "hlsx") {
+          try { await decLoad(note); } catch (e) { return ko({ kind: "unknown", det: "decodificatore non caricato: " + (e && e.message || e) }); }
+          if (token !== P.token) return ko({ kind: "stale" });
+          note("Decodificatore avanzato: preparo il canale…");
+          const L = decLoaders(token, P.ch.key, info => { if (info && !P.decShown) { P.decShown = true; P.decInfo = info; } });
+          Object.assign(opts, { pLoader: L.PL, fLoader: L.FL, fragLoadingTimeOut: 60000, maxBufferLength: 24, liveSyncDurationCount: 4, enableWorker: true });
+        }
+        else {   // lettore normale: si legge la scheda tecnica del primo pezzo, senza cambiarlo
+          const Base = Hls.DefaultConfig.loader;
+          const peek = d => { try { if (!P.pmt && d && d.byteLength) P.pmt = tsStreams(new Uint8Array(d, 0, Math.min(d.byteLength, 188 * 600))); } catch (e) {} };
+          const peekEnc = (data, dd) => {   // pezzo cifrato (AES-128): se ne decifra una copia solo per leggere la scheda tecnica
+            if (P.pmt || P.pmtP || !dd || !dd.key || !dd.iv || !data) return;
+            const copy = data.slice(0);   // tutto il pezzo: la cifratura controlla la chiusura del blocco finale
+            P.pmtP = crypto.subtle.importKey("raw", dd.key, { name: "AES-CBC" }, false, ["decrypt"])
+              .then(k => crypto.subtle.decrypt({ name: "AES-CBC", iv: dd.iv }, k, copy)).then(peek).catch(() => {});
+          };
+          opts.fLoader = class extends Base { load(ctx, cfg, cb) { super.load(ctx, cfg, Object.assign({}, cb, { onSuccess: (r, s2, c, n) => { const dd = c.frag && c.frag.decryptdata; if (dd && dd.method === "AES-128") peekEnc(r.data, dd); else peek(r.data); cb.onSuccess(r, s2, c, n); } })); } };
+          P.peek = peek;
+        }
+        const hls = new Hls(opts);
+        hls.on(Hls.Events.BUFFER_CODECS, (_, d) => { P.hlsTracks = { v: !!(P.hlsTracks && P.hlsTracks.v) || !!(d.video || d.audiovideo), a: !!(P.hlsTracks && P.hlsTracks.a) || !!(d.audio || d.audiovideo) }; });
+        if (st.e === "hls") hls.on(Hls.Events.FRAG_DECRYPTED, (_, d) => { if (P.peek && d && d.payload) P.peek(d.payload.buffer || d.payload); });
         P.hls = hls;
         hls.on(Hls.Events.ERROR, (_, d) => {
           if (!d.fatal) return;
@@ -1384,6 +1578,7 @@ function helpDialog() {
     h("ul", { class: "help" },
       li("Playlist:", "M3U e M3U8, da link, da file, incollate o con accesso Xtream Codes. Gruppi da group-title, loghi da tvg-logo."),
       li("Canali:", "HLS (.m3u8), DASH (.mpd, senza DRM), MPEG-TS (.ts, anche Xtream), FLV, MP4 e audio."),
+      li("Decodificatore avanzato:", "se il browser non legge il formato di un canale HLS (audio Dolby AC-3/E-AC-3, audio MP2, video MPEG-2), lo converte al volo con FFmpeg, come fa VLC. Parte da solo; dal menu del canale puoi anche sceglierlo a mano. La prima volta scarica circa 10 MB."),
       li("Guida TV:", "XMLTV, anche compressa .gz. Si collega ai canali con tvg-id o con il nome."),
       li("Preferiti:", "tieni premuto un canale, oppure tocca la stella nel lettore."),
       li("Nel lettore:", "scorri in su o in giù per cambiare canale, tocca due volte per lo schermo intero."),
