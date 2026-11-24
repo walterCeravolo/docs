@@ -2,6 +2,7 @@ TIVÙ PLAYER - lettore IPTV nel browser
 
 COSA C'È IN QUESTA CARTELLA
   index.html             l'app (tutto dentro: aspetto e codice)
+  lista.m3u              la lista di canali che ogni utente trova gia' caricata (sostituiscila per aggiornarla a tutti)
   manifest.webmanifest   per installarla sul telefono come un'app ("Aggiungi a schermata Home")
   sw.js                  la fa aprire anche senza rete
   icon*.png, icon.svg    icone

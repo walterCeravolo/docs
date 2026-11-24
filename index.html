@@ -243,6 +243,10 @@ kbd { font: 12px ui-monospace, Menlo, Consolas, monospace; border: 1px solid var
 .p-msg .acts { display: flex; gap: 8px; flex-wrap: wrap; justify-content: center; margin-top: 6px; }
 .p-msg .btn { background: rgba(255, 255, 255, .14); color: #fff; }
 .p-msg .btn.primary { background: #fff; color: #10151d; }
+.p-msg { overflow-y: auto; touch-action: pan-y; }
+.p-det { width: 100%; margin-top: 4px; text-align: left; }
+.p-det summary { cursor: pointer; text-align: center; color: rgba(255, 255, 255, .75); font-size: 13.5px; padding: 6px; }
+.p-pre { white-space: pre-wrap; word-break: break-all; font: 11.5px/1.45 ui-monospace, Menlo, Consolas, monospace; max-height: 34vh; overflow: auto; background: rgba(255, 255, 255, .08); border-radius: 8px; padding: 10px; margin: 6px 0 0; color: #e6e9ee; user-select: text; -webkit-user-select: text; touch-action: pan-y; }
 .p-zap { position: absolute; top: calc(env(safe-area-inset-top, 0px) + 72px); left: 50%; transform: translateX(-50%); background: rgba(0, 0, 0, .7); border-radius: 10px; padding: 10px 16px; font-size: 15px; font-weight: 500; pointer-events: none; max-width: 80vw; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .p-cast { position: absolute; inset: 0; display: grid; place-items: center; text-align: center; color: rgba(255, 255, 255, .85); padding: 24px; }
 .p-cast .i { width: 56px; height: 56px; margin: 0 auto 10px; }
@@ -696,7 +700,7 @@ function openDrawer() {
   const go = fn => () => { closeLayer(L); fn(); };
   for (const pl of S.pls) {
     const n = pl.count != null ? pl.count + (pl.count === 1 ? " canale" : " canali") : "";
-    const src = { url: "da link", file: "da file", text: "incollata", xtream: "Xtream Codes", demo: "esempio" }[pl.src] || "";
+    const src = pl.id === DEFAULT_PL.id ? "predefinita" : { url: "da link", file: "da file", text: "incollata", xtream: "Xtream Codes" }[pl.src] || "";
     const row = h("div", { style: "display:flex;align-items:center" },
       h("button", { class: "dr-item" + (S.pl && S.pl.id === pl.id ? " on" : ""), type: "button", style: "flex:1;min-width:0", onclick: go(() => selectPlaylist(pl)) }, icon("playlist"), h("span", { class: "tx" }, h("b", { text: pl.name }), h("small", { text: [n, src].filter(Boolean).join(" · ") }))),
       h("button", { class: "ib", type: "button", style: "color:var(--muted);margin-right:4px", "aria-label": "Opzioni di " + pl.name, onclick: go(() => playlistSheet(pl)) }, icon("more")));
@@ -836,42 +840,6 @@ function setStatus(msg, ms, btn) {
 function busy(d) { S.loading = Math.max(0, S.loading + d); $("loadbar").hidden = !S.loading; }
 
 // ======================= gestione playlist =======================
-const DEMO_M3U = `#EXTM3U
-#EXTINF:-1 group-title="Dirette di prova",Akamai Live
-https://cph-p2p-msl.akamaized.net/hls/live/2000341/test/master.m3u8
-#EXTINF:-1 group-title="Dirette di prova",Bipbop 4:3
-https://devstreaming-cdn.apple.com/videos/streaming/examples/bipbop_4x3/bipbop_4x3_variant.m3u8
-#EXTINF:-1 group-title="Dirette di prova",Bipbop 16:9
-https://devstreaming-cdn.apple.com/videos/streaming/examples/bipbop_16x9/bipbop_16x9_variant.m3u8
-#EXTINF:-1 group-title="Dirette di prova",Bipbop fMP4
-https://devstreaming-cdn.apple.com/videos/streaming/examples/img_bipbop_adv_example_fmp4/master.m3u8
-#EXTINF:-1 group-title="Film liberi",Big Buck Bunny
-https://test-streams.mux.dev/x36xhzz/x36xhzz.m3u8
-#EXTINF:-1 group-title="Film liberi",Tears of Steel
-https://demo.unified-streaming.com/k8s/features/stable/video/tears-of-steel/tears-of-steel.ism/.m3u8
-#EXTINF:-1 group-title="Film liberi",Sintel
-https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/Sintel.mp4
-#EXTINF:-1 group-title="Film liberi",Elephants Dream
-https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ElephantsDream.mp4
-#EXTINF:-1 group-title="Corti",For Bigger Blazes
-https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerBlazes.mp4
-#EXTINF:-1 group-title="Corti",For Bigger Escapes
-https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerEscapes.mp4
-#EXTINF:-1 group-title="Corti",For Bigger Fun
-https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerFun.mp4
-#EXTINF:-1 group-title="Corti",For Bigger Joyrides
-https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerJoyrides.mp4
-#EXTINF:-1 group-title="Corti",For Bigger Meltdowns
-https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerMeltdowns.mp4
-#EXTINF:-1 group-title="Motori",Subaru Outback
-https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/SubaruOutbackOnStreetAndDirt.mp4
-#EXTINF:-1 group-title="Motori",Volkswagen GTI
-https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/VolkswagenGTIReview.mp4
-#EXTINF:-1 group-title="Motori",Bullrun
-https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/WeAreGoingOnBullrun.mp4
-#EXTINF:-1 group-title="Motori",Un'auto con mille dollari
-https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/WhatCarCanYouGetForAGrand.mp4
-`;
 const SUGGEST = [
   { name: "Italia", url: "https://iptv-org.github.io/iptv/countries/it.m3u" },
   { name: "Notizie", url: "https://iptv-org.github.io/iptv/categories/news.m3u" },
@@ -880,7 +848,29 @@ const SUGGEST = [
   { name: "Film", url: "https://iptv-org.github.io/iptv/categories/movies.m3u" },
   { name: "Bambini", url: "https://iptv-org.github.io/iptv/categories/kids.m3u" },
 ];
-function demoPlaylist() { return { id: "demo", name: "esempio.m3u", src: "demo", text: DEMO_M3U, created: Date.now(), updated: Date.now() }; }
+// LISTA PREDEFINITA: il file lista.m3u accanto all'app. Chi apre l'app la prima volta la trova gia' caricata; si
+// aggiorna da sola ogni 24 ore dal sito, quindi basta sostituire lista.m3u per aggiornarla a tutti.
+const DEFAULT_PL = { id: "default", name: "Fulgione TV", file: "lista.m3u" };
+async function installDefault(select) {
+  busy(1);
+  try {
+    const url = new URL(DEFAULT_PL.file, location.href).href;
+    const text = await fetchText(url), parsed = parseM3U(text, url);
+    if (!parsed.channels.length) throw new Error("lista vuota");
+    const old = S.pls.find(p => p.id === DEFAULT_PL.id);
+    const rec = { id: DEFAULT_PL.id, name: old ? old.name : DEFAULT_PL.name, src: "url", url, text, created: 0, updated: Date.now(), count: parsed.channels.length, epgAuto: parsed.epg, epgUrl: old ? old.epgUrl || "" : "" };
+    await DB.put("playlists", rec); await refreshPlaylistsList();
+    if (select) await selectPlaylist(S.pls.find(p => p.id === rec.id), { fresh: true });
+    return true;
+  } catch (e) { setStatus("Non riesco a caricare la lista predefinita. " + friendlyFetchError(DEFAULT_PL.file, e), 9000); return false; }
+  finally { busy(-1); }
+}
+async function dropDemo() {   // le versioni precedenti avevano una playlist di prova: si toglie
+  if (!S.pls.some(p => p.id === "demo")) return;
+  await DB.del("playlists", "demo"); await DB.del("epg", "demo"); for (const k of ["favs.", "rec.", "tab."]) store.del(k + "demo");
+  if (store.get("cur", null) === "demo") store.del("cur");
+  await refreshPlaylistsList();
+}
 async function refreshPlaylistsList() { S.pls = (await DB.all("playlists")).sort((a, b) => (a.created || 0) - (b.created || 0)); }
 async function selectPlaylist(pl, opt) {
   opt = opt || {};
@@ -1140,22 +1130,51 @@ function plan(url) {
   else steps.push(hlsStep(u), mse ? { e: "ts", url: proxied ? proxify(u) : u } : null, { e: "native", url: proxied ? proxify(u) : u });
   return { steps: steps.filter(Boolean), proxied, live: k !== "file" };
 }
+// LINK RAI (mediapolis.rai.it/relinker): il server della Rai risponde con un rimando all'indirizzo vero del video,
+// a volte in http (bloccato da una pagina https) o verso un server che non permette la lettura da un sito web. Qui si
+// chiede l'indirizzo vero in formato XML (output=45) DAL TELEFONO (indirizzo italiano) e si riproduce quello, in https.
+const isRelinker = u => /^https?:\/\/mediapolis\.rai\.it\/relinker\//i.test(u);
+async function resolveRelinker(u) {
+  const x = new URL(u.replace(/^http:/i, "https:")); x.searchParams.set("output", "45");
+  const r = await fetchSmart(x.href); const t = await r.text(); P.raiXml = t.slice(0, 1500);
+  const cd = v => v.replace(/<!\[CDATA\[|\]\]>/g, "").trim();
+  const m = /<url\b[^>]*type="content"[^>]*>([\s\S]*?)<\/url>/i.exec(t) || /<url\b[^>]*>([\s\S]*?)<\/url>/i.exec(t);
+  if (!m) throw new Error("risposta Rai senza indirizzo");
+  const url = deEnt(cd(m[1]));
+  if (/video_no_available/i.test(url)) return { geo: true, url };
+  let la = "", lm = /<license_url\b[^>]*>([\s\S]*?)<\/license_url>/i.exec(t);
+  if (lm) { const raw = deEnt(cd(lm[1])); if (raw && raw !== "{}") { try { const j = JSON.parse(raw), arr = j.drmLicenseUrlValues || j.licenseUrlValues || []; const w = arr.find(v => /widevine/i.test(v.drm || "")) || arr[0]; la = w ? w.licenceUrl || w.licenseUrl || w.url || "" : ""; } catch (e) { if (/^https?:/i.test(raw)) la = raw; } if (!la) la = "?"; } }
+  return { url, la };
+}
 async function playIdx(idx) {
   const ch = P.list[idx]; if (!ch) return;
   P.idx = idx; P.ch = ch; P.started = false; P.retried = false; const token = ++P.token;
   addRecent(ch); updatePlayerInfo(); hideMsg(); $("pCastInfo").hidden = true; showUi(true);
-  stopEngines(); spin(true); setIcon($("pPlay"), "pause");
+  stopEngines(); spin(true); setIcon($("pPlay"), "pause"); $("pSeek").hidden = true;
   if ("mediaSession" in navigator) try {
     navigator.mediaSession.metadata = new MediaMetadata({ title: ch.name, artist: ch.group || S.pl.name, artwork: ch.logo && /^https:/.test(ch.logo) ? [{ src: ch.logo, sizes: "512x512" }] : [] });
     navigator.mediaSession.setActionHandler("previoustrack", () => zap(-1)); navigator.mediaSession.setActionHandler("nexttrack", () => zap(1));
   } catch (e) {}
   // tra i tentativi falliti si mostra il motivo piu' utile (es. «errore 404» invece di «formato non supportato»)
-  const pl = plan(ch.url); let lastErr = null; const RANK = { http: 6, drm: 5, mixed: 4, network: 3, timeout: 2, format: 1, unknown: 0 };
-  if (!pl.steps.length) { spin(false); return showError({ kind: "format" }, ch); }
-  for (const st of pl.steps) {
+  let lastErr = null; const RANK = { geo: 8, http: 6, drm: 5, mixed: 4, network: 3, timeout: 2, format: 1, unknown: 0 };
+  const keep = e => { if (!lastErr || (RANK[e && e.kind] ?? 0) >= (RANK[lastErr.kind] ?? 0)) lastErr = e; };
+  P.trace = []; P.raiXml = "";
+  const steps = [];
+  if (isRelinker(ch.url)) {
+    try {
+      const rr = await resolveRelinker(ch.url); if (token !== P.token) return;
+      P.trace.push({ e: "rai", kind: rr.geo ? "geo" : "ok", det: rr.url + (rr.la ? " · DRM " + rr.la : "") });
+      if (rr.geo) keep({ kind: "geo" });
+      else for (const st of plan(rr.url).steps) { if (rr.la && rr.la !== "?") st.la = rr.la; steps.push(st); }
+    } catch (e) { if (token !== P.token) return; P.trace.push({ e: "rai", kind: "network", det: String(e && e.message || e) }); }
+  }
+  const pl = plan(ch.url);
+  for (const st of pl.steps) if (!steps.some(x => x.e === st.e && x.url === st.url)) steps.push(st);
+  if (!steps.length) { spin(false); return showError(lastErr || { kind: "format" }, ch); }
+  for (const st of steps) {
     if (token !== P.token) return;
     try { await attempt(st, token, pl.proxied); if (token === P.token) { P.started = true; spin(false); updateSeek(); } return; }
-    catch (e) { if (token !== P.token) return; if (!lastErr || (RANK[e && e.kind] ?? 0) >= (RANK[lastErr.kind] ?? 0)) lastErr = e; stopEngines(); }
+    catch (e) { if (token !== P.token) return; P.trace.push(Object.assign({ e: st.e, url: st.url }, e)); keep(e); stopEngines(); }
   }
   spin(false); showError(lastErr || { kind: "unknown" }, ch);
 }
@@ -1167,7 +1186,7 @@ function attempt(st, token, proxied) {
     const onLoaded = () => { const p = video.play(); if (p && p.catch) p.catch(err => { if (err && err.name === "NotAllowedError") { setIcon($("pPlay"), "play"); showUi(true); ok(); } }); };
     const onPlaying = () => ok();
     const onErr = () => ko(classifyMedia(video.error, st.url));
-    const tm = setTimeout(() => ko({ kind: "timeout" }), 25000);
+    const tm = setTimeout(() => ko({ kind: "timeout", det: "nessun video in 25 s" }), 25000);
     function cleanup() { clearTimeout(tm); video.removeEventListener("loadeddata", onLoaded); video.removeEventListener("playing", onPlaying); video.removeEventListener("error", onErr); }
     video.addEventListener("loadeddata", onLoaded); video.addEventListener("playing", onPlaying); video.addEventListener("error", onErr);
     try {
@@ -1192,8 +1211,10 @@ function attempt(st, token, proxied) {
         dp.on(dashjs.MediaPlayer.events.ERROR, ev => {
           const er = ev && ev.error || {}, msg = String(er.message || "");
           const e = /protection|key|drm|license/i.test(msg) || er.code === 110 ? { kind: "drm" } : /download|manifest|xhr|load/i.test(msg) || (er.code >= 10 && er.code < 40) ? (isMixed(st.url) ? { kind: "mixed" } : { kind: "network" }) : { kind: "format" };
+          e.det = "dash " + (er.code || "") + " " + msg.slice(0, 120);
           if (!P.started) ko(e); else showError(e, P.ch);
         });
+        if (st.la) dp.setProtectionData({ "com.widevine.alpha": { serverURL: st.la } });
         dp.initialize(video, st.url, true);
       } else if (st.e === "ts" || st.e === "flv") {
         await loadScript(LIB.ts); if (token !== P.token) return ko({ kind: "stale" });
@@ -1201,34 +1222,65 @@ function attempt(st, token, proxied) {
         const p = M.createPlayer({ type: st.e === "flv" ? "flv" : "mpegts", isLive: true, url: st.url }, { enableWorker: true, lazyLoad: false, liveBufferLatencyChasing: true, liveBufferLatencyMaxLatency: 8 });
         P.ts = p;
         p.on(M.Events.ERROR, (type, detail, info) => {
-          const e = { kind: type === M.ErrorTypes.NETWORK_ERROR ? (info && info.code >= 400 ? "http" : isMixed(st.url) ? "mixed" : "network") : "format", code: info && info.code };
+          const e = { kind: type === M.ErrorTypes.NETWORK_ERROR ? (info && info.code >= 400 ? "http" : isMixed(st.url) ? "mixed" : "network") : "format", code: info && info.code, det: String(detail || "") + (info && info.msg ? " " + info.msg : "") };
           if (!P.started) ko(e); else showError(e, P.ch);
         });
         p.attachMediaElement(video); p.load();
       } else {
         video.src = st.url; video.load();
       }
-    } catch (e) { ko({ kind: "unknown", msg: e && e.message }); }
+    } catch (e) { ko({ kind: "unknown", det: String(e && e.message || e) }); }
   });
 }
 function classifyMedia(err, url) {
-  if (isMixed(url)) return { kind: "mixed" };
+  const det = err ? "video " + err.code + (err.message ? " " + err.message : "") : "";
+  if (isMixed(url)) return { kind: "mixed", det };
   if (!err) return { kind: "unknown" };
-  if (err.code === 4) return { kind: "format" };
-  if (err.code === 2) return { kind: "network" };
-  return { kind: "unknown", msg: err.message };
+  if (err.code === 4) return { kind: "format", det };
+  if (err.code === 2) return { kind: "network", det };
+  return { kind: "unknown", det };
 }
 function classifyHls(d, url) {
   const code = d.response && d.response.code;
-  if (d.type === "networkError") { if (code >= 400) return { kind: "http", code }; if (isMixed(url) || isMixed(d.url || "")) return { kind: "mixed" }; return { kind: "network" }; }
-  if (d.type === "mediaError") return { kind: "format" };
-  return { kind: "unknown", msg: d.details };
+  const det = "hls " + d.details + (code != null ? " " + code : "") + (d.reason ? " " + d.reason : "") + (d.error && d.error.message ? " " + d.error.message : "");
+  const eu = d.url || (d.context && d.context.url) || (d.frag && d.frag.url) || "";
+  if (d.type === "networkError" || d.type === "keySystemError") {
+    if (d.type === "keySystemError") return { kind: "drm", det, eu };
+    if (code >= 400) return { kind: "http", code, det, eu }; if (isMixed(url) || isMixed(eu)) return { kind: "mixed", det, eu }; return { kind: "network", det, eu };
+  }
+  if (d.type === "mediaError") return { kind: "format", det, eu };
+  return { kind: "unknown", det, eu };
+}
+// DETTAGLI TECNICI (dal telefono): cosa e' stato provato, cosa sa riprodurre il browser e cosa risponde il server
+async function diagText(ch, trace) {
+  const L = ["Canale: " + ch.name, "Indirizzo: " + ch.url, "Pagina: " + location.origin, "Browser: " + navigator.userAgent];
+  const ms = window.MediaSource || window.ManagedMediaSource, v = document.createElement("video");
+  const t = c => { try { return ms && ms.isTypeSupported(c) ? "sì" : "no"; } catch (e) { return "?"; } };
+  L.push("HLS nativo: " + (v.canPlayType("application/vnd.apple.mpegurl") || "no") + " · MSE " + (ms ? "sì" : "no") + " · AAC " + t('audio/mp4; codecs="mp4a.40.2"') + " · AC-3 " + t('audio/mp4; codecs="ac-3"') + " · E-AC-3 " + t('audio/mp4; codecs="ec-3"') + " · HEVC " + t('video/mp4; codecs="hvc1.1.6.L120.90"'));
+  L.push("Tentativi:"); for (const x of trace) L.push("- " + x.e + ": " + x.kind + (x.code ? " " + x.code : "") + (x.det ? " (" + x.det + ")" : "") + (x.url && x.url !== ch.url ? " · " + x.url : "") + (x.eu && x.eu !== x.url ? " · su " + x.eu : ""));
+  if (P.raiXml) L.push("Risposta Rai:", P.raiXml);
+  const probe = async (u, label) => {
+    try {
+      const ctl = new AbortController(), to = setTimeout(() => ctl.abort(), 10000);
+      const r = await fetch(u, { cache: "no-store", signal: ctl.signal }); clearTimeout(to);
+      const ct = (r.headers.get("content-type") || "").toLowerCase();
+      L.push("- " + label + ": risposta " + r.status + " " + ct + (r.redirected ? " → " + r.url : ""));
+      if (/mpegurl|text|xml|json|dash/.test(ct) || /\.(m3u8?|mpd)(\?|$)/i.test(r.url)) { const tx = await r.text(); L.push(tx.slice(0, 1200)); return { tx, url: r.url }; }
+      try { r.body && r.body.cancel(); } catch (e) {}
+    } catch (e) { L.push("- " + label + ": bloccata (" + (e.name === "AbortError" ? "nessuna risposta in 10 s" : (e.message || e) + ": di solito il server non permette la lettura da un sito web, oppure rimanda a un indirizzo http") + ")"); }
+    return null;
+  };
+  L.push("Lettura diretta:");
+  const first = await probe(ch.url, "indirizzo");
+  if (first && /#EXTM3U/.test(first.tx)) { const vl = first.tx.split(/\r?\n/).find(l => l && l[0] !== "#"); if (vl) { try { await probe(new URL(vl.trim(), first.url).href, "variante"); } catch (e) {} } }
+  return L.join("\n");
 }
 function spin(on) { $("pSpin").hidden = !on; }
 function hideMsg() { $("pMsg").hidden = true; $("player").classList.remove("has-msg"); }
 function showError(e, ch) {
   spin(false); if (!ch || ch !== P.ch) return;
   const T = {
+    geo: ["Canale visibile solo dall'Italia", "La Rai ha risposto che da questa connessione il canale non è disponibile. Se sei in Italia, prova senza VPN o con un'altra rete."],
     mixed: ["Canale bloccato dal browser", "Il canale usa un indirizzo http e questa pagina è https, quindi il browser non lo carica. Aprilo in un'altra app (come VLC) oppure imposta un proxy https nelle impostazioni."],
     network: ["Il canale non risponde", "Il server del canale non è raggiungibile o non permette la visione da un sito web. Può funzionare in un'altra app (come VLC) o con un proxy."],
     http: ["Il server ha rifiutato il canale", "Errore " + (e.code || "") + ": il canale potrebbe essere offline, cambiato di indirizzo o riservato agli abbonati."],
@@ -1238,11 +1290,15 @@ function showError(e, ch) {
     unknown: ["Impossibile riprodurre il canale", "Riprova tra poco oppure aprilo in un'altra app."],
   }[e.kind] || ["Impossibile riprodurre il canale", "Riprova tra poco oppure aprilo in un'altra app."];
   let extra = FRAMED && (e.kind === "network" || e.kind === "unknown" || e.kind === "timeout") ? " Nell'anteprima dentro un'altra pagina (come claude.ai) i video esterni possono essere bloccati: apri l'app dal suo indirizzo." : "";
+  const pre = h("pre", { class: "p-pre", text: "Raccolgo i dettagli…" }), trace = (P.trace || []).slice(); let asked = false;
+  const det = h("details", { class: "p-det" }, h("summary", { text: "Dettagli tecnici" }), pre,
+    h("button", { class: "btn", type: "button", style: "margin-top:8px", onclick: () => copyText(pre.textContent) }, "Copia dettagli"));
+  det.addEventListener("toggle", () => { if (det.open && !asked) { asked = true; diagText(ch, trace).then(tx => { pre.textContent = tx; }, er => { pre.textContent = "Errore: " + er; }); } });
   const box = h("div", { class: "box" }, icon("error"), h("h3", { text: T[0] }), h("p", { text: T[1] + extra }),
     h("div", { class: "acts" },
       h("button", { class: "btn primary", type: "button", onclick: () => playIdx(P.idx) }, "Riprova"),
       h("button", { class: "btn", type: "button", onclick: () => openExternal(ch) }, "Apri in un'altra app"),
-      P.list.length > 1 ? h("button", { class: "btn", type: "button", onclick: () => zap(1) }, "Canale successivo") : null));
+      P.list.length > 1 ? h("button", { class: "btn", type: "button", onclick: () => zap(1) }, "Canale successivo") : null), det);
   $("pMsg").replaceChildren(box); $("pMsg").hidden = false; $("player").classList.add("has-msg"); showUi(true);
 }
 function updatePlayerInfo() {
@@ -1298,14 +1354,14 @@ document.addEventListener("fullscreenchange", () => setIcon($("pFull"), document
   on("pFit", () => { fit = FITS[(FITS.indexOf(fit) + 1) % FITS.length]; store.set("fit", fit); applyFit(); toast("Formato: " + FIT_LABEL[fit], 1400); });
   on("pFull", toggleFull);
   const pl = $("player"); let sx = 0, sy = 0, st = 0, moved = false;
-  pl.addEventListener("touchstart", e => { if (e.target.closest("button,input")) return; sx = e.touches[0].clientX; sy = e.touches[0].clientY; st = Date.now(); moved = false; }, { passive: true });
+  pl.addEventListener("touchstart", e => { st = 0; if (e.target.closest("button,input,.p-msg")) return; sx = e.touches[0].clientX; sy = e.touches[0].clientY; st = Date.now(); moved = false; }, { passive: true });
   pl.addEventListener("touchend", e => {
-    if (e.target.closest("button,input") || !st) return; const t = e.changedTouches[0], dx = t.clientX - sx, dy = t.clientY - sy; st = 0;
+    if (e.target.closest("button,input,.p-msg") || !st) return; const t = e.changedTouches[0], dx = t.clientX - sx, dy = t.clientY - sy; st = 0;
     if (Math.abs(dy) > 70 && Math.abs(dx) < 60) { moved = true; zap(dy < 0 ? 1 : -1); }   // scorri in su: canale successivo
   }, { passive: true });
   let lastTap = 0;
   pl.addEventListener("click", e => {
-    if (e.target.closest("button,input,.p-msg .box")) return; if (moved) { moved = false; return; }
+    if (e.target.closest("button,input,.p-msg .box,summary")) return; if (moved) { moved = false; return; }
     const now = Date.now(); if (now - lastTap < 300) { toggleFull(); lastTap = 0; return; } lastTap = now;
     const ui = $("pUi"); if (ui.classList.contains("show") && !video.paused) { ui.classList.remove("show"); clearTimeout(P.hideT); } else showUi();
   });
@@ -1346,7 +1402,7 @@ function settingsDialog() {
     h("div", { class: "set-sec", text: "Dati" }),
     h("div", { class: "chips" },
       h("button", { class: "chip", type: "button", onclick: () => { if (!S.pl) return; S.recs = []; store.set("rec." + S.pl.id, []); if (S.tab === TAB_REC) render(true); toast("Recenti cancellati"); } }, "Cancella i recenti"),
-      h("button", { class: "chip", type: "button", onclick: async () => { const d = demoPlaylist(); await DB.put("playlists", d); await refreshPlaylistsList(); selectPlaylist(S.pls.find(p => p.id === "demo")); toast("Playlist di esempio ripristinata"); } }, "Ripristina l'esempio")),
+      h("button", { class: "chip", type: "button", onclick: async () => { if (await installDefault(true)) toast("Lista predefinita ripristinata"); } }, "Ripristina la lista predefinita")),
   ];
   dialog({ title: "Impostazioni", wide: true, body, actions: [{ label: "Fatto", primary: true, run: () => { set("proxy", proxy.value.trim()); } }] });
 }
@@ -1415,7 +1471,8 @@ document.addEventListener("keydown", e => {
 (async function boot() {
   applyCfg();
   await refreshPlaylistsList();
-  if (!S.pls.length && !store.get("seeded", false)) { await DB.put("playlists", demoPlaylist()); store.set("seeded", true); await refreshPlaylistsList(); }
+  await dropDemo();
+  if (!store.get("seededDefault", false)) { if (S.pls.some(p => p.id === DEFAULT_PL.id) || await installDefault(false)) store.set("seededDefault", true); }
   const cur = store.get("cur", null), pl = S.pls.find(p => p.id === cur) || S.pls[0];
   if (pl) await selectPlaylist(pl, { boot: true }); else { renderTabs(); render(true); }
   initCast();

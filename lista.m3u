@@ -1,0 +1,433 @@
+#EXTM3U url-tvg="https://www.davidefulgione.com/epg/l4.xml.gz" x-tvg-url="https://www.davidefulgione.com/epg/l4.xml.gz"
+# Fulgione tivu.m3u - Community IPTV https://www.davidefulgione.com
+# @davide_tv - aggiornata il 18/11/2026 07:08
+#EXTINF:-1 tvg-id="Rai1.it" tvg-logo="https://www.davidefulgione.com/assets/img/iptv/logo_1778506078_ba1324da.jpg" group-title="Nazionali",Rai 1
+https://mediapolis.rai.it/relinker/relinkerServlet.htm?cont=2606803&output=7&forceUserAgent=rainet/4.0.5
+#EXTINF:-1 tvg-id="Rai2.it" tvg-logo="https://www.davidefulgione.com/assets/img/iptv/logo_1778506187_a9d5bfb2.jpg" group-title="Nazionali",Rai 2
+https://mediapolis.rai.it/relinker/relinkerServlet.htm?cont=308718&output=7&forceUserAgent=rainet/4.0.5
+#EXTINF:-1 tvg-id="Rai3.it" tvg-logo="https://www.davidefulgione.com/assets/img/iptv/logo_1778506263_43646c31.png" group-title="Nazionali",Rai 3
+https://mediapolis.rai.it/relinker/relinkerServlet.htm?cont=308709&output=7&forceUserAgent=rainet/4.0.5
+#EXTINF:-1 tvg-id="Rete.4.it" tvg-logo="https://www.davidefulgione.com/assets/img/iptv/logo_1778506321_fcbb22de.png" group-title="Nazionali",Rete 4
+https://live02-seg.msf.cdn.mediaset.net/live/ch-r4/r4-clr.isml/index.m3u8
+#EXTINF:-1 tvg-id="Canale.5.it" tvg-logo="https://www.davidefulgione.com/assets/img/iptv/logo_1778506499_b86ee88a.png" group-title="Nazionali",Canale 5
+https://live02-seg.msf.cdn.mediaset.net/live/ch-c5/c5-clr.isml/index.m3u8
+#EXTINF:-1 tvg-id="Italia.1.it" tvg-logo="https://www.davidefulgione.com/assets/img/iptv/logo_1778506575_a1ef6996.png" group-title="Nazionali",Italia 1
+https://live02-seg.msf.cdn.mediaset.net/live/ch-i1/i1-clr.isml/index.m3u8
+#EXTINF:-1 tvg-id="LA7.HD.it" tvg-logo="https://www.davidefulgione.com/assets/img/iptv/logo_1778506629_9197b481.jpg" group-title="Nazionali",La 7
+https://jmp2.uk/stvp-ITBD1500002NL
+#EXTINF:-1 tvg-id="La7d.it" tvg-logo="https://www.davidefulgione.com/assets/img/iptv/la7d.jpg" group-title="Nazionali",La 7 Cinema
+https://d15umi5iaezxgx.cloudfront.net/HBBTV/LA7D/DASH/Live.mpd
+#EXTINF:-1 tvg-id="canale.it" tvg-logo="https://www.davidefulgione.com/assets/img/iptv/canale7.png" group-title="Nazionali",Canale7
+http://wms.shared.streamshow.it:80/canale7/canale7/playlist.m3u8
+#EXTINF:-1 tvg-id="Real.Time.it" tvg-logo="https://www.davidefulgione.com/assets/img/iptv/real.png" group-title="Nazionali",Real Time
+https://streaming.aurora.enhanced.live/live/mpc/enl0eG1mLmVncmVzcy5mZDJ2eHI=/out/v1/IT_SIMULCAST/REALTIME/CMAF/index.m3u8
+#EXTINF:-1 tvg-id="Discovery.Channel.it" tvg-logo="https://www.davidefulgione.com/assets/img/iptv/dis.png" group-title="Nazionali",Discovery Channel
+https://streaming.aurora.enhanced.live/live/mpc/enl0eG1mLmVncmVzcy5mZDJ2eHI=/out/v1/IT_SIMULCAST/DISCOVERYCHANNEL/CMAF/index.m3u8
+#EXTINF:-1 tvg-id="TV8.HD.it" tvg-logo="https://www.davidefulgione.com/assets/img/iptv/logo_1778506720_ca878b1b.jpg" group-title="Nazionali",Tv 8
+https://hlslive-web-gcdn-skycdn-it.akamaized.net/TACT/11223/tv8web/master.m3u8?hdnts=st=1764666351~exp=1829466206~acl=/*~hmac=b0e9165b6c55027903ad103c8219f363d8765eb300c0d9a339e9767fc3509556
+#EXTINF:-1 tvg-id="NOVE.it" tvg-logo="https://www.davidefulgione.com/uploads/community/logo/u1_1366ea06325a.jpg" group-title="Nazionali",NOve
+https://streaming.aurora.enhanced.live/live/mpc/enl0eG1mLmVncmVzcy5mZDJ2eHI=/out/v1/IT_SIMULCAST/NOVE/CMAF/index.m3u8
+#EXTINF:-1 tvg-id="Food.Network.it" tvg-logo="https://www.davidefulgione.com/assets/img/iptv/fn.png" group-title="Nazionali",Food Network
+https://streaming.aurora.enhanced.live/live/mpc/enl0eG1mLmVncmVzcy5mZDJ2eHI=/out/v1/IT_SIMULCAST/FOODNETWORK/CMAF/index.m3u8
+#EXTINF:-1 tvg-id="20.it" tvg-logo="https://www.davidefulgione.com/assets/img/iptv/logo_1778506770_0cd8df97.jpg" group-title="Nazionali",20 Mediaset
+https://live02-seg.msf.cdn.mediaset.net/live/ch-lb/lb-clr.isml/index.m3u8
+#EXTINF:-1 tvg-id="Rai4.it" tvg-logo="https://www.davidefulgione.com/assets/img/iptv/logo_1778506850_cc2e7108.png" group-title="Nazionali",Rai 4
+https://mediapolis.rai.it/relinker/relinkerServlet.htm?cont=746966&output=7&forceUserAgent=rainet/4.0.5
+#EXTINF:-1 tvg-id="Rai4.it" tvg-logo="https://www.davidefulgione.com/uploads/community/logo/u1_d19a92dcb9e9.jpg" group-title="Nazionali",Rai 4K
+https://raievent10-elem-live.akamaized.net/hls/live/619189/raievent10/raievent10/playlist.m3u8
+#EXTINF:-1 tvg-id="dmax.it" tvg-logo="https://www.davidefulgione.com/uploads/community/logo/u1_993e7f49bc33.jpg" group-title="Nazionali",Dmax
+https://streaming.aurora.enhanced.live/live/mpc/enl0eG1mLmVncmVzcy5mZDJ2eHI=/out/v1/IT_SIMULCAST/DMAX/CMAF/index.m3u8
+#EXTINF:-1 tvg-id="Giallo.TV.it" tvg-logo="https://www.davidefulgione.com/assets/img/iptv/giallo.jpg" group-title="Nazionali",Giallo
+https://streaming.aurora.enhanced.live/live/mpc/enl0eG1mLmVncmVzcy5mZDJ2eHI=/out/v1/IT_SIMULCAST/GIALLO/CMAF/index.m3u8
+#EXTINF:-1 tvg-id="hg.it" tvg-logo="https://www.davidefulgione.com/assets/img/iptv/hg.jpg" group-title="Nazionali",Home & Garden
+https://streaming.aurora.enhanced.live/live/mpc/enl0eG1mLmVncmVzcy5mZDJ2eHI=/out/v1/IT_SIMULCAST/HGTV/CMAF/index.m3u8
+#EXTINF:-1 tvg-id="motortrend" tvg-logo="https://www.davidefulgione.com/assets/img/iptv/turbo.png" group-title="Nazionali",Turbo
+https://streaming.aurora.enhanced.live/live/mpc/enl0eG1mLmVncmVzcy5mZDJ2eHI=/out/v1/IT_SIMULCAST/TURBO/CMAF/index.m3u8
+#EXTINF:-1 tvg-id="Rai5.it" tvg-logo="https://www.davidefulgione.com/assets/img/iptv/logo_1778507011_0486c0c9.jpg" group-title="Nazionali",Rai 5
+https://mediapolis.rai.it/relinker/relinkerServlet.htm?cont=395276&output=7&forceUserAgent=raiplayappletv
+#EXTINF:-1 tvg-id="RaiMovie.it" tvg-logo="https://www.davidefulgione.com/assets/img/iptv/logo_1778507202_6c384590.jpg" group-title="Nazionali",Rai Movie
+https://mediapolis.rai.it/relinker/relinkerServlet.htm?cont=747002&output=7&forceUserAgent=raiplayappletv
+#EXTINF:-1 tvg-id="Iris.it" tvg-logo="https://www.davidefulgione.com/uploads/community/logo/u1_9022c6a4047b.png" group-title="Nazionali",Iris
+https://live03-col.msf.cdn.mediaset.net/live/ch-ki/ki-clr.isml/manifest.mpd
+#EXTINF:-1 tvg-id="RaiPremium.it" tvg-logo="https://www.davidefulgione.com/assets/img/iptv/logo_1778507101_72ca61de.jpg" group-title="Nazionali",Rai Premium
+https://mediapolis.rai.it/relinker/relinkerServlet.htm?cont=746992&output=7&forceUserAgent=raiplayappletv
+#EXTINF:-1 tvg-id="cielo.it" tvg-logo="https://www.davidefulgione.com/assets/img/iptv/logo_1778507178_896f22ff.jpg" group-title="Nazionali",Cielo
+https://hlslive-web-gcdn-skycdn-it.akamaized.net/TACT/11219/cieloweb/master.m3u8?hdnts=st=1764666351~exp=1829466206~acl=/*~hmac=b0e9165b6c55027903ad103c8219f363d8765eb300c0d9a339e9767fc3509556
+#EXTINF:-1 tvg-id="27.Twentyseven.it" tvg-logo="https://www.davidefulgione.com/assets/img/iptv/logo_1778507282_23aa9d31.jpg" group-title="Nazionali",Twenty Seven
+https://live02-seg.msf.cdn.mediaset.net/live/ch-ts/ts-clr.isml/index.m3u8
+#EXTINF:-1 tvg-id="La.5.it" tvg-logo="https://www.davidefulgione.com/assets/img/iptv/logo_1778507331_da55beff.jpg" group-title="Nazionali",La 5
+https://live02-seg.msf.cdn.mediaset.net/live/ch-ka/ka-clr.isml/index.m3u8
+#EXTINF:-1 tvg-id="Cine34.it" tvg-logo="https://www.davidefulgione.com/assets/img/iptv/logo_1778507385_48cbe89a.jpg" group-title="Nazionali",Cine 34
+https://live02-seg.msf.cdn.mediaset.net/live/ch-b6/b6-clr.isml/index.m3u8
+#EXTINF:-1 tvg-id="Focus.it" tvg-logo="https://www.davidefulgione.com/assets/img/iptv/logo_1778507524_590d842a.png" group-title="Nazionali",Focus
+https://live02-seg.msf.cdn.mediaset.net/live/ch-fu/fu-clr.isml/index.m3u8
+#EXTINF:-1 tvg-id="RaiStoria.it" tvg-logo="https://www.davidefulgione.com/assets/img/iptv/logo_1778507881_73bd0f83.png" group-title="Nazionali",Rai Storia
+https://mediapolis.rai.it/relinker/relinkerServlet.htm?cont=746990&output=7&forceUserAgent=raiplayappletv
+#EXTINF:-1 tvg-id="Mediaset.Extra.it" tvg-logo="https://www.davidefulgione.com/assets/img/iptv/logo_1778507947_6d6735f7.jpg" group-title="Nazionali",Mediaset Extra
+https://live02-seg.msf.cdn.mediaset.net/live/ch-kq/kq-clr.isml/index.m3u8
+#EXTINF:-1 tvg-id="RaiScuola.it" tvg-logo="https://www.davidefulgione.com/assets/img/iptv/logo_1778507986_e1ceea6b.png" group-title="Nazionali",Rai Scuola
+https://mediapolis.rai.it/relinker/relinkerServlet.htm?cont=747011&output=7&forceUserAgent=raiplayappletv
+#EXTINF:-1 tvg-id="Top.Crime.it" tvg-logo="https://www.davidefulgione.com/assets/img/iptv/logo_1778507559_cc9f0475.jpg" group-title="Nazionali",Top Crime
+https://live02-seg.msf.cdn.mediaset.net/live/ch-lt/lt-clr.isml/index.m3u8
+#EXTINF:-1 tvg-id="Italia.2.it" tvg-logo="https://www.davidefulgione.com/assets/img/iptv/logo_1778507750_1374148a.png" group-title="Nazionali",Italia 2
+https://live02-seg.msf.cdn.mediaset.net/live/ch-i2/i2-clr.isml/index.m3u8
+#EXTINF:-1 tvg-id="Gambero.Rosso.HD.it" tvg-logo="https://www.davidefulgione.com/uploads/community/logo/u1_da9e1268c701.jpg" group-title="Nazionali",Gambero Rosso
+https://www.dailymotion.com/cdn/live/video/x9u215s.mpd?sec=3FE6qHnAR5mSywqiY3XmMw
+#EXTINF:-1 tvg-id="RaiSport.it" tvg-logo="https://www.davidefulgione.com/assets/img/iptv/logo_1778508049_23c50908.png" group-title="Nazionali",Rai Sport
+https://mediapolis.rai.it/relinker/relinkerServlet.htm?cont=358025&output=7&forceUserAgent=raiplayappletv
+#EXTINF:-1 tvg-id="Rai.News.24..508.it" tvg-logo="https://www.davidefulgione.com/uploads/community/logo/u1_d292bf4eeefc.png" group-title="Nazionali",Rai News
+https://mediapolis.rai.it/relinker/relinkerServlet.htm?cont=1&output=7&forceUserAgent=raiplayappletv
+#EXTINF:-1 tvg-id="6971fc932c004063166ac8fd" tvg-logo="https://www.davidefulgione.com/uploads/community/logo/u1_785a2e0640dc.jpg" group-title="Nazionali",Il Sole 24 Ore
+https://amg14891-amg14891c8-amgplt0395.playout.now3.amagi.tv/playlist.m3u8
+#EXTINF:-1 tvg-id="Sky.TG24.it" tvg-logo="https://www.davidefulgione.com/assets/img/iptv/logo_1778507794_563f46c4.png" group-title="Nazionali",Sky TG 24
+https://hlslive-web-gcdn-skycdn-it.akamaized.net/TACT/12221/web/master.m3u8?hdnts=st=1764666351~exp=1829466206~acl=/*~hmac=b0e9165b6c55027903ad103c8219f363d8765eb300c0d9a339e9767fc3509556
+#EXTINF:-1 tvg-id="TGCom.it" tvg-logo="https://www.davidefulgione.com/assets/img/iptv/logo_1778507834_031fbdce.jpg" group-title="Nazionali",TG COM 24
+https://live02-seg.msf.cdn.mediaset.net/live/ch-kf/kf-clr.isml/index.m3u8
+#EXTINF:-1 tvg-id="Boing.it" tvg-logo="https://www.davidefulgione.com/assets/img/iptv/logo_1778507656_586fbf55.png" group-title="Nazionali",Boing
+https://live02-seg.msf.cdn.mediaset.net/live/ch-kb/kb-clr.isml/index.m3u8
+#EXTINF:-1 tvg-id="RaiYoyo.it" tvg-logo="https://www.davidefulgione.com/assets/img/iptv/logo_1778507703_e5456896.jpg" group-title="Nazionali",Rai YOYO
+https://mediapolis.rai.it/relinker/relinkerServlet.htm?cont=746899&output=7&forceUserAgent=raiplayappletv
+#EXTINF:-1 tvg-id="Cartoonito.it" tvg-logo="https://www.davidefulgione.com/uploads/community/logo/u1_2539a0fbf3e6.png" group-title="Nazionali",Cartonito
+https://live02-seg.msf.cdn.mediaset.net/live/ch-la/la-clr.isml/index.m3u8
+#EXTINF:-1 tvg-id="RaiGulp.it" tvg-logo="https://www.davidefulgione.com/uploads/community/logo/u1_c5863c1767ef.jpg" group-title="Nazionali",Rai Gulp
+https://raigulp3-live.akamaized.net/hls/live/2018015/raigulp3/raigulp3/playlist.m3u8
+#EXTINF:-1 tvg-id="Super!.it" tvg-logo="https://www.davidefulgione.com/uploads/community/logo/u1_5ab1113c8fb2.jpg" group-title="Nazionali",Super
+https://495c5a85d9074f29acffeaea9e0215eb.msvdn.net/super/super_main/super_main_hbbtv/playlist.m3u8
+#EXTINF:-1 tvg-id="redbulltv" tvg-logo="https://www.davidefulgione.com/assets/img/iptv/logo_1778508258_4a759f51.jpg" group-title="Nazionali",Red Bull
+https://dms.redbull.tv/v5/destination/rallytv/07f960dc-fd36-466c-971f-64a597518b83/personal_computer/http/us/en_US/playlist.m3u8
+#EXTINF:-1 tvg-id="Eurosport.Italia.it" tvg-logo="https://www.davidefulgione.com/assets/img/iptv/logo_1778508203_4ff1e881.png" group-title="Nazionali",Sport Italia
+https://origin-004.b-cdn.net/sportitalia/sihd_abr2/origin/sihd_1080p/chunks.m3u8
+#EXTINF:-1 tvg-logo="https://www.davidefulgione.com/uploads/community/logo/u1_dfe57dd80eaa.jpg" group-title="Sport",Golazo Network Serie A
+https://jmp2.uk/plu-63a0e33a45264d000850ed7e.m3u8
+#EXTINF:-1 tvg-logo="https://www.davidefulgione.com/assets/img/iptv/logo_1778508415_1e9cb10d.jpg" group-title="Nazionali",Boom Channel
+https://5f22d76e220e1.streamlock.net/canale6/canale6/playlist.m3u8
+#EXTINF:-1 tvg-id="SuperTennis.HD.it" tvg-logo="https://www.davidefulgione.com/assets/img/iptv/logo_1778508362_a1df91ff.png" group-title="Altro",Super Tennis
+https://live-embed.supertennix.hiway.media/restreamer/supertennix_client/gpu-a-c0-16/restreamer/outgest/aa3673f1-e178-44a9-a947-ef41db73211a/manifest.m3u8
+#EXTINF:-1 tvg-id="Sky.Sport.Tennis.it" tvg-logo="https://www.davidefulgione.com/assets/img/iptv/logo_1778509520_ee414234.jpg" group-title="Sport",Tennis +
+https://amg01935-amg01935c1-amgplt0020.playout.now3.amagi.tv/playlist.m3u8
+#EXTINF:-1 tvg-id="RTL.102.5.HD.it" tvg-logo="https://www.davidefulgione.com/assets/img/iptv/logo_1778508322_bc2e7b53.jpg" group-title="Nazionali",Rtl 102.5
+https://dd782ed59e2a4e86aabf6fc508674b59.msvdn.net/live/S97044836/tbbP8T1ZRPBL/playlist_video.m3u8
+#EXTINF:-1 tvg-id="RADIOFRECCIA.HD.it" tvg-logo="https://www.davidefulgione.com/assets/img/iptv/logo_1778508516_785ab6d1.png" group-title="Nazionali",Radio Freccia
+https://dd782ed59e2a4e86aabf6fc508674b59.msvdn.net/live/S3160845/0tuSetc8UFkF/playlist_video.m3u8
+#EXTINF:-1 tvg-id="Radio.Italia.TV.HD.it" tvg-logo="https://www.davidefulgione.com/assets/img/iptv/logo_1778508457_a4e87f95.png" group-title="Nazionali",Radio Italia Tv
+https://radioitaliatv.akamaized.net/hls/live/2093117/RadioitaliaTV/master.m3u8
+#EXTINF:-1 tvg-id="rds" tvg-logo="https://www.davidefulgione.com/assets/img/iptv/logo_1778508542_2e9cecd4.png" group-title="Nazionali",RDS TV
+https://stream.rdstv.radio/index.m3u8
+#EXTINF:-1 tvg-id="Radio.Italia.TV.HD.it" tvg-logo="https://www.davidefulgione.com/assets/img/iptv/logo_1778508574_0223e2ae.jpg" group-title="Nazionali",Radio Capital
+https://4c4b867c89244861ac216426883d1ad0.msvdn.net/live/S35394734/Z6U2wGoDYANk/playlist.m3u8
+#EXTINF:-1 tvg-id="Inter.TV.it" tvg-logo="https://www.davidefulgione.com/assets/img/iptv/logo_1778508630_372036b9.jpg" group-title="Sport",Inter 24/h
+https://amg27604-amg27604c2-amgplt0148.playout.now3.amagi.tv/playlist/amg27604-amg27604c2-amgplt0148/playlist.m3u8
+#EXTINF:-1 tvg-id="Solocalcio.it.it" tvg-logo="https://www.davidefulgione.com/assets/img/iptv/logo_1778508676_f4174ddd.jpg" group-title="Sport",Solo Calcio
+https://italiansport-solocalcio-samsung.amagi.tv/hls/amagi_hls_data_sportital-solocalcio-samsung-italy/CDN/playlist.m3u8
+#EXTINF:-1 tvg-logo="https://www.davidefulgione.com/assets/img/iptv/logo_1778508705_2c34f453.png" group-title="Nazionali",RTL BEST
+https://dd782ed59e2a4e86aabf6fc508674b59.msvdn.net/live/S76960628/OEPHRUIctA0M/playlist_video.m3u8
+#EXTINF:-1 tvg-id="kisskissnapolitv" tvg-logo="https://www.davidefulgione.com/assets/img/iptv/logo_1779250816_0917032d.png" group-title="Campania",Kiss Kiss Napoli
+https://58f12ffd2447a.streamlock.net/KKTVNapoli/livestream/playlist.m3u8
+#EXTINF:-1 tvg-logo="https://www.davidefulgione.com/assets/img/iptv/logo_1779250889_78022354.png" group-title="Campania",Rete Stereo 5
+https://stream1.aswifi.it/stereo5/live/index.m3u8
+#EXTINF:-1 tvg-logo="https://www.davidefulgione.com/assets/img/iptv/logo_1779250960_6e95a0dc.jpg" group-title="Campania",Prima TV Napoli
+https://57068da1deb21.streamlock.net/primatvnapoli/primatvnapoli/playlist.m3u8
+#EXTINF:-1 tvg-logo="https://www.davidefulgione.com/assets/img/iptv/logo_1779251043_106be3c1.jpg" group-title="Campania",Lira Tv
+https://streamcdnr7-a928c0678d284da5b383f29ecc5dfeec.msvdn.net/live/S57315730/8kTBWibNteJA/playlist.m3u8
+#EXTINF:-1 tvg-logo="https://www.davidefulgione.com/assets/img/iptv/logo_1779251112_091404a5.png" group-title="Campania",Quarto Canale Flegreo
+https://live.mariatvcdn.com/dialogos/171e41deedf405f10c7dd6311387fb43.sdp/playlist.m3u8
+#EXTINF:-1 tvg-id="Radio.Italia.TV.HD.it" tvg-logo="https://www.davidefulgione.com/assets/img/iptv/logo_1779251180_b630c825.png" group-title="Nazionali",Radio Ibiza
+https://str48.fluid.stream/RadioIbizaTV/livestream/playlist.m3u8
+#EXTINF:-1 tvg-id="tv-eng" tvg-logo="https://www.davidefulgione.com/assets/img/iptv/logo_1779251256_1ae51a6b.jpg" group-title="Altro",TV RNM4
+https://rtmp.streams.ovh:1936/radionapoliemme/radionapoliemme/playlist.m3u8
+#EXTINF:-1 tvg-logo="https://www.davidefulgione.com/assets/img/iptv/logo_1779251322_eb4400e4.jpg" group-title="Campania",CRC 84
+https://flash2.xdevel.com/crctv/crctv/manifest_w3998685.mpd
+#EXTINF:-1 tvg-logo="https://www.davidefulgione.com/assets/img/iptv/logo_1779251369_f624cb81.png" group-title="Campania",PSN TV
+https://rst2.saiuzwebnetwork.it:8081/persemprenews/index.m3u8
+#EXTINF:-1 tvg-id="Radio.Italia.TV.HD.it" tvg-logo="https://www.davidefulgione.com/assets/img/iptv/logo_1779251423_0d47f044.png" group-title="Campania",TeleRadio Ercolano
+https://rst2.saiuzwebnetwork.it:8081/teleradioercolano/index.m3u8
+#EXTINF:-1 tvg-logo="https://www.davidefulgione.com/assets/img/iptv/logo_1779251542_282d0707.jpg" group-title="Campania",Rtn Napoli
+https://rst2.saiuzwebnetwork.it:8081/saiuz-2/index.m3u8
+#EXTINF:-1 tvg-logo="https://www.davidefulgione.com/assets/img/iptv/logo_1779251590_0013ab2d.jpg" group-title="Campania",Tele Futura
+https://rst2.saiuzwebnetwork.it:8081/telefutura/index.m3u8
+#EXTINF:-1 tvg-logo="https://www.davidefulgione.com/assets/img/iptv/logo_1779251653_9c3eed53.png" group-title="Campania",Lacco Ameno
+https://rst2.saiuzwebnetwork.it:8081/laccoamenotv/index.m3u8
+#EXTINF:-1 tvg-logo="https://www.davidefulgione.com/assets/img/iptv/logo_1779251694_9f7e77a0.jpg" group-title="Lazio",Extra TV
+https://rst2.saiuzwebnetwork.it:8081/extratvlive/index.m3u8
+#EXTINF:-1 tvg-logo="https://www.davidefulgione.com/assets/img/iptv/logo_1779251760_791e02e8.jpg" group-title="Campania",Campania TV
+https://rst2.saiuzwebnetwork.it:8081/telemiracoli/index.m3u8
+#EXTINF:-1 tvg-logo="https://www.davidefulgione.com/assets/img/iptv/logo_1779251805_0458a988.png" group-title="Campania",Yara TV
+https://rst1.saiuzwebnetwork.it:8081/yaratv/index.m3u8
+#EXTINF:-1 tvg-logo="https://www.davidefulgione.com/assets/img/iptv/logo_1779251964_2401d9e9.jpg" group-title="Toscana",teatro TV
+https://teatrotv.iostream.it/teatrotv.m3u8
+#EXTINF:-1 tvg-logo="https://www.davidefulgione.com/assets/img/iptv/logo_1779251897_dfdfc29b.jpg" group-title="Campania",Nora TV
+https://57068da1deb21.streamlock.net/noratv/noratv/playlist.m3u8
+#EXTINF:-1 tvg-logo="https://www.davidefulgione.com/assets/img/iptv/logo_1779252134_74f87952.jpg" group-title="Campania",Stereo 5 TV
+https://stream1.aswifi.it/stereo5/live/index.m3u8
+#EXTINF:-1 tvg-logo="https://www.davidefulgione.com/assets/img/iptv/logo_1779252181_d32f0bc0.jpg" group-title="Campania",Otto Channel
+https://load-balancer.azotosolutions.com/cdnedge/smil:live.smil/playlist.m3u8
+#EXTINF:-1 tvg-logo="https://www.davidefulgione.com/assets/img/iptv/logo_1779252237_f0d11856.png" group-title="Campania",Stile TV
+https://proxy.media.convergenze.it/stiletv/streams/oQOFd7JglHjO1631525551097.m3u8
+#EXTINF:-1 tvg-logo="https://www.davidefulgione.com/assets/img/iptv/logo_1779252296_af1fc1a1.png" group-title="Campania",Set TV
+https://stream1.aswifi.it/settv/live/index.m3u8
+#EXTINF:-1 tvg-logo="https://www.davidefulgione.com/assets/img/iptv/logo_1779252341_c9aa5867.jpg" group-title="Abruzzo",Onda TV
+https://5926fc9c7c5b2.streamlock.net/9040/9040/chunklist_w1247497225.m3u8
+#EXTINF:-1 tvg-logo="https://www.davidefulgione.com/assets/img/iptv/logo_1779252405_645e73da.png" group-title="Lombardia",Telenova
+https://64b16f23efbee.streamlock.net/telenova/telenova/playlist.m3u8
+#EXTINF:-1 tvg-logo="https://www.davidefulgione.com/assets/img/iptv/logo_1779252448_797ecb51.png" group-title="Nazionali",Euro Tv
+https://5f22d76e220e1.streamlock.net/eurotv/eurotv/playlist.m3u8
+#EXTINF:-1 tvg-logo="https://www.davidefulgione.com/assets/img/iptv/logo_1779252523_2f35430f.png" group-title="Campania",Minformo TV
+https://5db313b643fd8.streamlock.net/MinformoTV/MinformoTV/playlist.m3u8
+#EXTINF:-1 tvg-logo="https://www.davidefulgione.com/assets/img/iptv/logo_1779252558_fa9c1f94.png" group-title="Lazio",TeleUniverso
+https://stream.ets-sistemi.it:19360/teleuniverso/teleuniverso.m3u8
+#EXTINF:-1 tvg-id="med-tv" tvg-logo="https://www.davidefulgione.com/assets/img/iptv/logo_1779252597_c140f578.png" group-title="Campania",MediaSud
+https://5f22d76e220e1.streamlock.net/mediasud/mediasud/playlist.m3u8
+#EXTINF:-1 tvg-id="Sportitalia.HD.it" tvg-logo="https://www.davidefulgione.com/assets/img/iptv/logo_1779252636_17876021.jpg" group-title="Sport",Sport Channel 214
+https://5dcabf026b188.streamlock.net/SPORTCHANNEL214/livestream/playlist.m3u8
+#EXTINF:-1 tvg-logo="https://www.davidefulgione.com/assets/img/iptv/logo_1779252668_9f86ef17.png" group-title="Toscana",ReteMIa
+https://5db313b643fd8.streamlock.net/rete/rete/playlist.m3u8
+#EXTINF:-1 tvg-logo="https://www.davidefulgione.com/assets/img/iptv/logo_1779252739_3fa18526.jpg" group-title="Campania",Info Cilento TV
+https://nrvideo1.newradio.it:1936/pskfvahhcs/pskfvahhcs/playlist.m3u8
+#EXTINF:-1 tvg-logo="https://www.davidefulgione.com/assets/img/iptv/logo_1779252704_982b8a03.png" group-title="Campania",TeleColore
+https://stream10.xdevel.com/video14s975955-1911/stream/playlist.m3u8
+#EXTINF:-1 tvg-logo="https://www.davidefulgione.com/assets/img/iptv/logo_1779252776_94ff0ae4.png" group-title="Campania",Primaset TV
+https://primaset.servizistreaming.it/hls/streamingcanale1.m3u8
+#EXTINF:-1 tvg-logo="https://www.davidefulgione.com/assets/img/iptv/logo_1779252833_a009ac4e.jpg" group-title="Campania",Canale 81
+https://5f22d76e220e1.streamlock.net/canale81lazio/canale81lazio/playlist.m3u8
+#EXTINF:-1 tvg-logo="https://www.davidefulgione.com/assets/img/iptv/logo_1779252920_961e3bc1.jpg" group-title="Campania",Tutto Napoli TV
+https://tmw.fluid.stream/rtn_tv/livestream/playlist.m3u8
+#EXTINF:-1 tvg-logo="https://www.davidefulgione.com/assets/img/iptv/logo_1779252952_d6f187e4.png" group-title="Sicilia",Bella TV
+https://server.bellaradio.it:1443/live/bellaradiotv/playlist.m3u8
+#EXTINF:-1 tvg-id="PlutoTvCinemaItaliano.it" tvg-logo="https://www.davidefulgione.com/assets/img/iptv/logo_1779252994_5bf66bca.png" group-title="Toscana",Cinemaitaliano
+https://cgentertainment-cgtv-1-it.samsung.wurl.tv/playlist.m3u8
+#EXTINF:-1 tvg-id="Radio.Italia.TV.HD.it" tvg-logo="https://www.davidefulgione.com/assets/img/iptv/logo_1779253030_f879b0cc.png" group-title="Nazionali",Radio MArte
+https://stream7.xdevel.com/video0s975753-774/stream/playlist.m3u8
+#EXTINF:-1 tvg-logo="https://www.davidefulgione.com/assets/img/iptv/logo_1779253067_6cb13c63.jpg" group-title="Calabria",Altro Corriere
+https://streamcdnr6-52ee6512fee4427889eba89957975fa0.msvdn.net/live/S24350460/BEj8ZmQiQ9UG/playlist.m3u8
+#EXTINF:-1 tvg-logo="https://www.davidefulgione.com/assets/img/iptv/logo_1779253201_c4b88e5b.jpg" group-title="Campania",Partenope Tv
+https://diretta.arcapuglia.it:8080/live/partenope/index.m3u8
+#EXTINF:-1 tvg-logo="https://www.davidefulgione.com/assets/img/iptv/logo_1779253259_73fa24c9.jpg" group-title="Campania",Tele Stabia
+https://stream3.aswifi.it/giglitv/live/index.m3u8
+#EXTINF:-1 tvg-logo="https://www.davidefulgione.com/assets/img/iptv/logo_1779253304_a4c3262e.png" group-title="Abruzzo",Rete Italia
+https://rst1.saiuzwebnetwork.it:8081/reteitalia/index.m3u8
+#EXTINF:-1 tvg-id="tv-eng" tvg-logo="https://www.davidefulgione.com/assets/img/iptv/logo_1779253342_1ae9d4aa.png" group-title="Campania",Tva 75
+https://stream10.xdevel.com/video0s978817-3107/stream/playlist.m3u8
+#EXTINF:-1 tvg-logo="https://www.davidefulgione.com/uploads/community/logo/u1_fd463b29130d.jpg" group-title="Campania",Antenna Sud
+https://live-antennasud.cdn.netrw.it/antennasud/hls/ccr/antennasud/master.m3u8
+#EXTINF:-1 tvg-logo="https://www.davidefulgione.com/uploads/community/logo/u1_6f3737adba9f.jpg" group-title="Campania",Antenna Sud extra
+https://live-antennasud.cdn.netrw.it/antennasud/hls/ccr/extra/master.m3u8
+#EXTINF:-1 group-title="Puglia",Studio 100
+https://cdn16.streamshow.it/cloud-studio100/studio100/playlist.m3u8
+#EXTINF:-1 tvg-logo="https://www.davidefulgione.com/uploads/community/logo/u1_cbd5aeac77b9.jpg" group-title="Puglia",Tele Sveva
+https://live2.telesveva.com/hls/svevahd.m3u8?watchkey=16356b9f
+#EXTINF:-1 tvg-id="rai4k" tvg-logo="https://www.davidefulgione.com/uploads/community/logo/u1_88e775843ea6.jpg" group-title="Nazionali",Rai World Premium
+https://d3k8wzt41aflvx.cloudfront.net/RAIP/Live.m3u8
+#EXTINF:-1 tvg-logo="https://www.davidefulgione.com/uploads/community/logo/u1_a32a82961ce4.jpg" group-title="Svizzera",Tele Ticino
+https://vstream-cdn.ch/hls/teleticino_720p/index.m3u8
+#EXTINF:-1 tvg-id="manga.it" tvg-logo="https://www.davidefulgione.com/uploads/community/logo/u1_889db57cd61e.jpg" group-title="Nazionali",Manga Tv
+https://c65b9e710bde44819015af98e72cd7ab.msvdn.net/live/S93572876/aILSQPYFY3pF/playlist.m3u
+#EXTINF:-1 tvg-logo="https://www.davidefulgione.com/uploads/community/logo/u1_09065d6ac294.jpg" group-title="Veneto",7 Gold
+https://streamcdnr6-dddfac816632463dac50b21109dc1bb3.msvdn.net/live/S58803518/OOZape6Nxp4H/playlist.m3u8
+#EXTINF:-1 tvg-id="tv2000" tvg-logo="https://www.davidefulgione.com/uploads/community/logo/u1_bf5b718cf553.jpg" group-title="Nazionali",Tv2000
+https://hls-live-tv2000.akamaized.net/hls/live/2028510/tv2000/master.m3u8
+#EXTINF:-1 tvg-id="senatotv1" tvg-logo="https://www.davidefulgione.com/uploads/community/logo/u1_1abd493c85c9.jpg" group-title="Nazionali",Senato Tv
+https://senato-live.morescreens.com/SENATO_1_001/playlist.m3u8
+#EXTINF:-1 tvg-logo="https://www.davidefulgione.com/uploads/community/logo/u1_71b3c0148981.jpg" group-title="Trentino Alto Adige",Alto Adige Tv
+https://5f204aff97bee.streamlock.net/AltoAdigeTV/livestream/playlist.m3u8
+#EXTINF:-1 tvg-logo="https://www.davidefulgione.com/uploads/community/logo/u1_15cbb6ca8eb0.jpg" group-title="Lombardia",Antenna 2 Bergamo
+https://58f12ffd2447a.streamlock.net/Antenna2/livestream/playlist.m3u8
+#EXTINF:-1 tvg-logo="https://www.davidefulgione.com/uploads/community/logo/u1_9f58da121d7d.jpg" group-title="Toscana",Antenna 3
+https://media2021.rtvweb.com/antenna3massa/a3/playlist.m3u8
+#EXTINF:-1 tvg-logo="https://www.davidefulgione.com/uploads/community/logo/u1_d5773f46b274.jpg" group-title="Lombardia",Tele Boario
+https://stream7.xdevel.com/video0s976425-1244/stream/playlist_dvr.m3u8
+#EXTINF:-1 tvg-logo="https://www.davidefulgione.com/uploads/community/logo/u1_25b484dadf74.jpg" group-title="Calabria",Tele Bruzzano
+https://playerssl.telemia.tv/fileadmin/hls/Telebruzzano/telebruzzano_mediachunks.m3u8
+#EXTINF:-1 tvg-logo="https://www.davidefulgione.com/uploads/community/logo/u1_cca37d4e86a8.jpg" group-title="Friuli",Tele Friuli
+https://5757bf2aa08e42248fb9b9d620f5d900.msvdn.net/live/S11646715/pE3ax0lT0rBd/playlist.m3u8
+#EXTINF:-1 tvg-logo="https://www.davidefulgione.com/uploads/community/logo/u1_e18f1e1b74ad.jpg" group-title="Calabria",Tele Jonio
+http://59d7d6f47d7fc.streamlock.net/telejonio/telejonio/playlist.m3u8
+#EXTINF:-1 tvg-logo="https://www.davidefulgione.com/uploads/community/logo/u1_e507d1dab13d.jpg" group-title="Nazionali",Masha & Orso
+https://amg01954-amg01954c4-samsung-it-10210.playouts.now.amagi.tv/playlist.m3u8
+#EXTINF:-1 tvg-logo="https://www.davidefulgione.com/uploads/community/logo/u1_41b781d56cac.jpg" group-title="Sony",Sony One Azione
+https://d1avfx1nmjmkde.cloudfront.net/playlist_1.m3u8
+#EXTINF:-1 tvg-logo="https://www.davidefulgione.com/uploads/community/logo/u1_81976498ebc1.jpg" group-title="Sony",Sony One Divertenti
+https://d2lsjs0kluheol.cloudfront.net/playlist_1.m3u8
+#EXTINF:-1 tvg-logo="https://www.davidefulgione.com/uploads/community/logo/u1_8196239ab0d0.jpg" group-title="Rakuten",Rakuten TV drama
+https://drama-rakuten-tv-it.fast.rakuten.tv/v1/master/0547f18649bd788bec7b67b746e47670f558b6b2/production-LiveChannel-6094/master.m3u8
+#EXTINF:-1 tvg-logo="https://www.davidefulgione.com/uploads/community/logo/u1_9983dbd61083.jpg" group-title="Rakuten",Rakuten Tv Fantascienza
+https://sci-fi-rakuten-tv-it.fast.rakuten.tv/v1/master/0547f18649bd788bec7b67b746e47670f558b6b2/production-LiveChannel-6430/master.m3u8
+#EXTINF:-1 tvg-logo="https://www.davidefulgione.com/uploads/community/logo/u1_9e72b560c47b.jpg" group-title="Rakuten",Rakuten Tv Romance
+https://romance-rakuten-tv-it.fast.rakuten.tv/v1/master/0547f18649bd788bec7b67b746e47670f558b6b2/production-LiveChannel-6193/master.m3u8
+#EXTINF:-1 tvg-logo="https://www.davidefulgione.com/uploads/community/logo/u1_865da52040fd.jpg" group-title="Rakuten",Rakuten Tv Commedia
+https://comedy-rakuten-tv-it.fast.rakuten.tv/v1/master/0547f18649bd788bec7b67b746e47670f558b6b2/production-LiveChannel-6184/master.m3u8
+#EXTINF:-1 tvg-logo="https://www.davidefulgione.com/uploads/community/logo/u1_eea66a64481e.jpg" group-title="Rakuten",Rakuten Tv Family
+https://family-rakuten-tv-it.fast.rakuten.tv/v1/master/0547f18649bd788bec7b67b746e47670f558b6b2/production-LiveChannel-6215/master.m3u8
+#EXTINF:-1 tvg-id="RakutenCrimeSeriesItRakutenTv.it" tvg-logo="https://www.davidefulgione.com/uploads/community/logo/u1_2b61046ce27f.jpg" group-title="Rakuten",Rakuten Serie Crime
+https://546609034c0e41d7b5852dd870ddb53b.mediatailor.eu-west-1.amazonaws.com/v1/master/0547f18649bd788bec7b67b746e47670f558b6b2/production-LiveChannel-6216/master.m3u8
+#EXTINF:-1 tvg-id="PlutoTvFilm.it" tvg-logo="https://www.davidefulgione.com/uploads/community/logo/u1_acbc3f29c646.jpg" group-title="Pluto",Pluto Tv Film
+https://jmp2.uk/plu-608aa17fb9f4490007e6419a.m3u8
+#EXTINF:-1 tvg-logo="https://www.davidefulgione.com/uploads/community/logo/u1_bfcf357c3df5.jpg" group-title="Pluto",Pluto Tv Azione
+https://jmp2.uk/plu-608aa20a2e7f270007c4878d.m3u8
+#EXTINF:-1 tvg-logo="https://www.davidefulgione.com/uploads/community/logo/u1_e6688051a30e.jpg" group-title="Pluto",Pluto Tv Romance
+https://jmp2.uk/plu-608aa4a4cc92820007b663af.m3u8
+#EXTINF:-1 tvg-logo="https://www.davidefulgione.com/uploads/community/logo/u1_adba807e721b.jpg" group-title="Pluto",Pluto Tv Triller
+https://jmp2.uk/plu-608aa5e995132a00075f7005.m3u8
+#EXTINF:-1 tvg-logo="https://www.davidefulgione.com/uploads/community/logo/u1_bdc1340d863a.jpg" group-title="Pluto",Pluto Tv Commedia
+https://jmp2.uk/plu-608aa512d67fd900072323db.m3u8
+#EXTINF:-1 tvg-id="PlutoTvToto.it" tvg-logo="https://www.davidefulgione.com/uploads/community/logo/u1_0b310632cf0c.jpg" group-title="Pluto",Pluto Tv Totò
+https://jmp2.uk/plu-65253f9881f942000833ccd5.m3u8
+#EXTINF:-1 tvg-id="PlutoTvWestern.it" tvg-logo="https://www.davidefulgione.com/uploads/community/logo/u1_6261922cf511.jpg" group-title="Pluto",Pluto Tv Western
+https://jmp2.uk/plu-62e7fb67478a5b0007e6c50c.m3u8
+#EXTINF:-1 tvg-id="PlutoTvViaggi.it" tvg-logo="https://www.davidefulgione.com/uploads/community/logo/u1_d7a927222b5a.jpg" group-title="Pluto",Pluto Tv Viaggi
+https://jmp2.uk/plu-63c923944207be0007fd0887.m3u8
+#EXTINF:-1 tvg-id="Sportitalia.HD.it" tvg-logo="https://www.davidefulgione.com/uploads/community/logo/u1_e77deb349e9f.jpg" group-title="Pluto",Pluto Tv Sport
+https://jmp2.uk/plu-608030eff4b6f70007e1684c.m3u8
+#EXTINF:-1 tvg-logo="https://www.davidefulgione.com/uploads/community/logo/u1_68cedc6998fa.jpg" group-title="Nexostudio",Nexostudio thriller
+https://amg02512-nexodigital-amg02512c2-samsung-it-765.playouts.now.amagi.tv/playlist/amg02512-nexodigital-levitedeglialtri-samsungit/playlist.m3u8
+#EXTINF:-1 tvg-id="65f865a62873090008d06382" tvg-logo="https://www.davidefulgione.com/uploads/community/logo/u1_9a16246ee1b2.jpg" group-title="Nexostudio",Nexostudio Duri a Morire
+https://amg02512-amg02512c5-samsung-it-2560.playouts.now.amagi.tv/playlist/amg02512-nexodigital-duriamorire-samsungit/playlist.m3u8
+#EXTINF:-1 tvg-logo="https://www.davidefulgione.com/uploads/community/logo/u1_2bff808b4273.jpg" group-title="Nexostudio",Cine Malizia
+https://amg02512-amg02512c6-samsung-it-5137.playouts.now.amagi.tv/playlist.m3u8
+#EXTINF:-1 tvg-logo="https://www.davidefulgione.com/uploads/community/logo/u1_8e98fd7324af.jpg" group-title="Nexostudio",Cine Paura
+https://amg02512-amg02512c7-samsung-it-5138.playouts.now.amagi.tv/playlist/amg02512-nexodigital-comedytime-samsungit/playlist.m3u8
+#EXTINF:-1 tvg-logo="https://www.davidefulgione.com/uploads/community/logo/u1_9f926e09b194.jpg" group-title="Nexostudio",I Misteri della Fede
+https://nexoapp.d-dr.com/api/live/misteri-fede/live.m3u8
+#EXTINF:-1 tvg-logo="https://www.davidefulgione.com/uploads/community/logo/u1_b6ddca234569.jpg" group-title="Nexostudio",Opera Legend
+https://nexoapp.d-dr.com/api/live/opera-legends/live.m3u8
+#EXTINF:-1 tvg-logo="https://www.davidefulgione.com/uploads/community/logo/u1_be2a67f1ee7a.jpg" group-title="Nexostudio",Grande Arte
+https://nexoapp.d-dr.com/api/live/la-grande-arte/live.m3u8
+#EXTINF:-1 tvg-id="RakutenFullMoon.it" tvg-logo="https://www.davidefulgione.com/uploads/community/logo/u1_9c67be023047.jpg" group-title="Altro",Adrenaline Movies
+https://2967edc6.wurl.com/4300.m3u8
+#EXTINF:-1 tvg-logo="https://www.davidefulgione.com/uploads/community/logo/u1_3dd32eceda7a.jpg" group-title="Chili",Chili Tv Alta Tensione
+https://chili-chili-alta-tensione-1-it.xiaomi.wurl.tv/4300.m3u8
+#EXTINF:-1 tvg-logo="https://www.davidefulgione.com/uploads/community/logo/u1_678fc0c856ed.jpg" group-title="Chili",Chili Tv Smile
+https://chili-chilibuonumore-1-it.xiaomi.wurl.tv/4300.m3u8
+#EXTINF:-1 tvg-logo="https://www.davidefulgione.com/uploads/community/logo/u1_467dc10531d4.jpg" group-title="Chili",Chili Tv Indimenticabili
+https://chili-chiliindimenticabili-1-it.xiaomi.wurl.tv/4300.m3u8
+#EXTINF:-1 tvg-logo="https://www.davidefulgione.com/uploads/community/logo/u1_e190adb98260.jpg" group-title="Chili",Chili Tv Velvet
+https://chili-chilivelvet-1-it.xiaomi.wurl.tv/4300.m3u8
+#EXTINF:-1 tvg-id="RomaTV.it" tvg-logo="https://www.davidefulgione.com/uploads/community/logo/u1_1f3da3a752aa.jpg" group-title="Altro",Romantica
+https://amg00069-amg00069c3-samsung-it-5223.playouts.now.amagi.tv/1080p/index.m3u8
+#EXTINF:-1 tvg-id="PlutoTvCinemaItaliano.it" tvg-logo="https://www.davidefulgione.com/uploads/community/logo/u1_8ffd07870b76.jpg" group-title="Altro",Cinema Italiano
+https://c4d2cd4a.wurl.com/4300.m3u8
+#EXTINF:-1 tvg-id="66177d18c8311c0008d077d0" tvg-logo="https://www.davidefulgione.com/uploads/community/logo/u1_7bd2a8aaf6f1.jpg" group-title="Altro",Storie Criminali
+https://amg01821-amg01821c19-samsung-it-3199.playouts.now.amagi.tv/1080p-vtt/index.m3u8
+#EXTINF:-1 tvg-id="Sportitalia.HD.it" tvg-logo="https://www.davidefulgione.com/uploads/community/logo/u1_a759c8015910.jpg" group-title="Sport",Documentari Sportivi
+https://d3i87cms5m5yjq.cloudfront.net/mov_720.m3u8
+#EXTINF:-1 tvg-id="tennis-channel-en" tvg-logo="https://www.davidefulgione.com/uploads/community/logo/u1_741bfa242401.jpg" group-title="Sport",Tennis Channel
+https://amg01444-tennischannelth-tennischde-samsungch-jp1l8.amagi.tv/playlist/amg01444-tennischannelth-tennischde-samsungch/playlist.m3u8
+#EXTINF:-1 tvg-id="Sportitalia.HD.it" tvg-logo="https://www.davidefulgione.com/uploads/community/logo/u1_8b940df8dd32.jpg" group-title="Sport",FF Motor Sport
+https://host1.momentotv.live:28443/cmaf/ffmotorsport/playlist.m3u8
+#EXTINF:-1 tvg-id="Rai1.it" tvg-logo="https://www.davidefulgione.com/uploads/community/logo/u1_f8016d19fcbd.jpg" group-title="Nazionali",Rai 1 Europa
+https://d3k8wzt41aflvx.cloudfront.net/RAI1/Live.m3u8
+#EXTINF:-1 tvg-id="Rai1.it" tvg-logo="https://www.davidefulgione.com/uploads/community/logo/u1_35e63183e02e.jpg" group-title="Nazionali",Rai 1 Estero
+https://dash2.antik.sk/live/test_rai_uno_tizen/playlist.m3u8
+#EXTINF:-1 tvg-id="QVC.it" tvg-logo="https://www.davidefulgione.com/uploads/community/logo/u1_713247d4b14b.jpg" group-title="Nazionali",QVC
+https://qrg.akamaized.net/hls/live/2017383/lsqvc1it/master.m3u8
+#EXTINF:-1 tvg-logo="https://www.davidefulgione.com/uploads/community/logo/u1_a9f7f1473409.jpg" group-title="Emilia Romagna",Tele Libertà
+https://liberta.cdn.streamup.eu/origin/teleliberta_abr/playlist.m3u8
+#EXTINF:-1 tvg-logo="https://www.davidefulgione.com/uploads/community/logo/u1_9c32ccb863b4.jpg" group-title="Campania",Tele Montecarlo
+https://stream10.xdevel.com/video17s975955-2173/stream/playlist.m3u8
+#EXTINF:-1 tvg-id="tv-eng" group-title="Campania",Tv Luna
+https://diretta.arcapuglia.it:8080/live/teleluna/index.m3u8
+#EXTINF:-1 tvg-logo="https://www.davidefulgione.com/uploads/community/logo/u1_de1628e164d9.jpg" group-title="Lombardia",Tele Color
+https://streamcdnr17-1aadf145546f475282c5b4e658c0ac4b.msvdn.net/live/324149/hlbAWtl/chunklist_b3128000.m3u8
+#EXTINF:-1 tvg-logo="https://www.davidefulgione.com/uploads/community/logo/u1_9fdeecd0b177.jpg" group-title="Sicilia",Antenna Sicilia
+https://antennasicilialive.cdn.netrw.it/antennasicilialive/hls/ccr/antennasicilia/master.m3u8
+#EXTINF:-1 tvg-logo="https://www.davidefulgione.com/uploads/community/logo/u1_8377057d72d5.jpg" group-title="Sicilia",Tc Telecolor
+https://antennasicilialive.cdn.netrw.it/antennasicilialive/hls/ccr/telecolor/master.m3u8
+#EXTINF:-1 tvg-logo="https://www.davidefulgione.com/uploads/community/logo/u1_8433f4dd4a24.jpg" group-title="Altro",Fatti di Nera
+https://router.xdevel.com/video0s975363-69/stream/playlist.m3u8
+#EXTINF:-1 tvg-logo="https://www.davidefulgione.com/uploads/community/logo/u1_e2ed78629d32.jpg" group-title="Abruzzo",LAQ TV
+https://fn.rtsp.me/vpj3aUjHhfFun6zYIvxOQQ/1791697851/hls/dkrZ77K2.m3u8
+#EXTINF:-1 tvg-id="tv-eng" group-title="Abruzzo",TV SEI
+https://654be07bf207c.streamlock.net/TvSeiHBBTV/_definst_/tvseiWebPresenter/playlist.m3u8
+#EXTINF:-1 group-title="Abruzzo",Rete 8
+https://64b16f23efbee.streamlock.net/rete8/rete8/playlist.m3u8
+#EXTINF:-1 tvg-id="Super!.it" group-title="Abruzzo",Super J
+https://59d39900ebfb8.streamlock.net/SuperJtv/SuperJtv/playlist.m3u8
+#EXTINF:-1 tvg-id="Euronews.it" tvg-logo="https://www.davidefulgione.com/uploads/community/logo/u1_909a4b2ef52c.jpg" group-title="Nazionali",Euronews Italia
+https://acb6ca89.wurl.com/master/f36d25e7e52f1ba8d7e56eb859c636563214f541/UmxheHhUVi1ldV9FdXJvbmV3c0l0YWxpYW5vX0hMUw/playlist.m3u8
+#EXTINF:-1 tvg-logo="https://www.davidefulgione.com/uploads/community/logo/u1_461fc387d84f.jpg" group-title="Sport",Italia Fishing
+https://fms.premio.link/fishingtv/playlist.m3u8
+#EXTINF:-1 group-title="Puglia",Tele Norba
+https://live-telenorba.cdn.netrw.it/telenorba/hls/ccr/telenorba/master.m3u8
+#EXTINF:-1 tvg-id="RADIONORBA.TV.it" group-title="Nazionali",Radio Norba Tv
+https://stream12.xdevel.com/video0s975885-2349/stream/playlist_dvr.m3u8
+#EXTINF:-1 tvg-id="TG.NORBA.24.it" group-title="Puglia",TG Norba 24
+https://live-telenorba.cdn.netrw.it/telenorba/hls/ccr/tgnorba/master.m3u8
+#EXTINF:-1 group-title="Puglia",Antenna Sud Extra
+https://live-antennasud.cdn.netrw.it/antennasud/hls/ccr/extra/master.m3u8
+#EXTINF:-1 group-title="Puglia",Tele Rama
+https://58d921499d3d3.streamlock.net/TeleRama/livestream/playlist.m3u8
+#EXTINF:-1 group-title="Puglia",Tele Bari
+https://w1.mediastreaming.it/telebari/livestream/playlist.m3u8
+#EXTINF:-1 group-title="Puglia",Tele Sveva
+https://live2.telesveva.com/hls/svevahd.m3u8
+#EXTINF:-1 group-title="Puglia",Tele Dehon
+https://64b16f23efbee.streamlock.net/teledehonapp/ngrp:teledehonapp_all/playlist.m3u8
+#EXTINF:-1 group-title="Calabria",Tele Reggio
+https://trm-telereggio.cdn.netrw.it/event/hls/ccr/telereggio/master.m3u8
+#EXTINF:-1 tvg-logo="https://www.davidefulgione.com/uploads/community/logo/u1_f0cc1fbd6087.jpg" group-title="Sicilia",Zerouno Tv News
+https://5f22d76e220e1.streamlock.net/01news/01news/playlist.m3u8
+#EXTINF:-1 tvg-logo="https://www.davidefulgione.com/uploads/community/logo/u1_94693cbd9420.jpg" group-title="Sicilia",WL TV
+https://5db313b643fd8.streamlock.net/WLTV/WLTV/playlist.m3u8
+#EXTINF:-1 tvg-id="Radio.Italia.TV.HD.it" tvg-logo="https://www.davidefulgione.com/uploads/community/logo/u1_e69a6f44693c.png" group-title="Sicilia",Vintage Radio Tv
+https://5f22d76e220e1.streamlock.net/vintageradiotv/vintageradiotv/playlist.m3u8
+#EXTINF:-1 tvg-logo="https://www.davidefulgione.com/uploads/community/logo/u1_645510a4bc4d.jpg" group-title="Piemonte",Video Novara
+https://ed04.top-ix.org/avtvlive/videonovara/streaming/playlist.m3u8
+#EXTINF:-1 tvg-logo="https://www.davidefulgione.com/uploads/community/logo/u1_4a2f175cef33.jpg" group-title="Sicilia",Video regione Sicilia
+https://57214cb172d84f8cb311b91513952b03.msvdn.net/live/S40896499/ZuaLjACsWIL4/playlist.m3u8
+#EXTINF:-1 tvg-logo="https://www.davidefulgione.com/uploads/community/logo/u1_f0c617742f6a.jpg" group-title="Sicilia",Video Mediterraneo
+https://bfbe5f347ac4424faf719dda285bc39e.msvdn.net/live/S54897858/4gWO7tTzpK3N/playlist.m3u8
+#EXTINF:-1 tvg-logo="https://www.davidefulgione.com/uploads/community/logo/u1_9987873e86ac.jpg" group-title="Calabria",Video Calabria
+https://a8a02dd9a49a4fc9810743615c65ab73.msvdn.net/live/S76734991/i6NeNqLYaspb/playlist.m3u8
+#EXTINF:-1 group-title="Emilia Romagna",E TV
+https://5f11919dca3bd.streamlock.net/E-TvRete7/_definst_/myStream/playlist.m3u8
+#EXTINF:-1 tvg-logo="https://www.davidefulgione.com/uploads/community/logo/u1_3b67e9baa4fd.jpg" group-title="Liguria",Primocanale
+https://msh0203.stream.seeweb.it/live/flv:stream2.sdp/playlist.m3u8
+#EXTINF:-1 tvg-logo="https://www.davidefulgione.com/uploads/community/logo/u1_dd5dc27bb66b.jpg" group-title="Sardegna",Videolina
+https://5bb65e9de3fdf.streamlock.net/vod/_definst_/smil:EMME_Video//20261110//369295394_TG_1330_REPLICA_20261110.smil/playlist.m3u8
+#EXTINF:-1 tvg-id="Sportitalia.HD.it" group-title="Sport",Move - Sportivi in Viaggio
+https://d3i87cms5m5yjq.cloudfront.net/v1/manifest/3722c60a815c199d9c0ef36c5b73da68a62b09d1/cc-75fzs486ayykg/786a1920-e873-4f03-8285-21e5b88e0111/0.m3u8
+#EXTINF:-1 tvg-logo="https://www.davidefulgione.com/uploads/community/logo/u1_5075c63b0377.jpg" group-title="Nazionali",A Tavola
+https://dtsorovv03oh7.cloudfront.net/v1/manifest/3722c60a815c199d9c0ef36c5b73da68a62b09d1/cc-ehf4c6ojtfs4b/2cbac0a7-6702-47a7-a457-e195348f3572/1.m3u8
+#EXTINF:-1 tvg-id="Sportitalia.HD.it" group-title="Sport",Sport Outdoor
+https://502f86d03b3c403a9057ca656866c9c9.mediatailor.us-east-1.amazonaws.com/v1/manifest/44f73ba4d03e9607dcd9bebdcb8494d86964f1d8/Samsung-it_SportOutdoorTV/24d290e2-28fb-4221-b995-45ca971e140b/0.m3u8
+#EXTINF:-1 tvg-logo="https://www.davidefulgione.com/uploads/community/logo/u1_9b01d0334ac9.jpg" group-title="Nazionali",Risate Cult 80
+https://c4838229e8cb4e568ac1eda486176dae.mediatailor.us-east-1.amazonaws.com/v1/manifest/44f73ba4d03e9607dcd9bebdcb8494d86964f1d8/Samsung-it_FilmandSorrisi/5c8850c2-d236-4b62-81dc-9cb99092c8f6/0.m3u8
+#EXTINF:-1 tvg-logo="https://www.davidefulgione.com/uploads/community/logo/u1_eab7a08154c9.jpg" group-title="Emilia Romagna",12 Tv Parma
+https://5929b138b139d.streamlock.net/12TVParma/livestream/chunklist_w249411558.m3u8
+#EXTINF:-1 tvg-logo="https://www.davidefulgione.com/uploads/community/logo/u1_bd4fad4ec6c6.png" group-title="Nazionali",3B Meteo
+https://amg22086-amg22086c1-samsung-it-7477.playouts.now.amagi.tv/playlist/amg22086-ixmedia-3bmeteo-samsungit/playlist.m3u8
+#EXTINF:-1 tvg-logo="https://www.davidefulgione.com/uploads/community/logo/u1_9d95fdec12f6.jpg" group-title="Nazionali",5 Min Creativi
+https://d266mze7uh4wuz.cloudfront.net/playlist/amg02051-amg02051c7-274/playlist.m3u8
+#EXTINF:-1 tvg-logo="https://www.davidefulgione.com/uploads/community/logo/u1_6bf0c20db93e.jpg" group-title="Trentino Alto Adige",Alto Adige Tv
+https://5f204aff97bee.streamlock.net/AltoAdigeTV/livestream/playlist.m3u8
+#EXTINF:-1 tvg-logo="https://www.davidefulgione.com/uploads/community/logo/u1_fae9ec86de76.jpg" group-title="Sardegna",Aristanis Tv
+https://video2.azotosolutions.com:1936/supertvoristano/supertvoristano/playlist.m3u8
+#EXTINF:-1 tvg-logo="https://www.davidefulgione.com/uploads/community/logo/u1_696115180e80.jpg" group-title="Puglia",Aurora Arte
+https://video2.azotosolutions.com:1936/supertvoristano/supertvoristano/playlist.m3u8
+#EXTINF:-1 tvg-logo="https://www.davidefulgione.com/uploads/community/logo/u1_27ed21cc7bec.jpg" group-title="Piemonte",Azzurra Tv
+https://video2.azotosolutions.com:1936/supertvoristano/supertvoristano/playlist.m3u8
+#EXTINF:-1 tvg-logo="https://www.davidefulgione.com/uploads/community/logo/u1_63d55fdf8cf0.png" group-title="Lombardia",Elive Tv Brescia
+https://59d7d6f47d7fc.streamlock.net/elivebresciatv/elivebresciatv/playlist.m3u8
+#EXTINF:-1 tvg-logo="https://www.davidefulgione.com/uploads/community/logo/u1_081a7bba6ec4.jpg" group-title="Liguria",Entella Tv
+https://5f22d76e220e1.streamlock.net/EntellaTV/EntellaTV/playlist.m3u8
+#EXTINF:-1 tvg-logo="https://www.davidefulgione.com/uploads/community/logo/u1_ceaf4d748ad8.jpg" group-title="Emilia Romagna",Icaro Tv
+https://59d7d6f47d7fc.streamlock.net/icarotv/icarotv/playlist.m3u8
+#EXTINF:-1 tvg-id="Italia.2.it" tvg-logo="https://www.davidefulgione.com/uploads/community/logo/u1_16f67f9ac768.png" group-title="Campania",Italia2 TV
+https://signal.teleon.live/play/Dh70J8LN3tQqmabVl8yFErG4LLGJ6h-4VIv1ncgOTQh_nHzZ2TuvvYMG8sfiXazzwqUMfoLXk2pIh1MxRBCkKGWjJhEnPohkDIL2SG2us2Kad8tBXKpsFToaDcM2.m3u8?token=test
+#EXTINF:-1 tvg-logo="https://www.davidefulgione.com/uploads/community/logo/u1_e6be0e875879.jpg" group-title="Calabria",La C TV
+https://f5842579ff984c1c98d63b8d789673eb.msvdn.net/live/S47282891/JWjL3xqPf4bX/playlist.m3u8
+#EXTINF:-1 tvg-logo="https://www.davidefulgione.com/uploads/community/logo/u1_acf75298c05c.jpg" group-title="Calabria",La Tr3 Marsala
+https://tsw.streamingwebtv24.it:1936/eslife1/eslife1/playlist.m3u8
+#EXTINF:-1 tvg-logo="https://www.davidefulgione.com/uploads/community/logo/u1_0fc5095b9f31.jpg" group-title="Lombardia",Lombardia Tv
+https://5db313b643fd8.streamlock.net/lmbiatv/lmbiatv/playlist.m3u8
+#EXTINF:-1 tvg-id="med-tv" tvg-logo="https://www.davidefulgione.com/uploads/community/logo/u1_6c103648a4d4.jpg" group-title="Puglia",Mediterranea Tv
+https://streamcdnn1-bfbe5f347ac4424faf719dda285bc39e.msvdn.net/live/S54897858/4gWO7tTzpK3N/playlist.m3u8
+#EXTINF:-1 tvg-logo="https://www.davidefulgione.com/uploads/community/logo/u1_171089387347.jpg" group-title="Campania",Nuova Tv1
+https://nuovatv.net:8443/tv/stream.m3u8
+#EXTINF:-1 tvg-logo="https://www.davidefulgione.com/uploads/community/logo/u1_22712d16522f.jpg" group-title="Campania",Nuova Tv2
+https://nuovatv.net:8443/tv2/stream.m3u8
+#EXTINF:-1 tvg-logo="https://www.davidefulgione.com/uploads/community/logo/u1_271881676a27.jpg" group-title="Veneto",Oerler Tv
+https://w1.mediastreaming.it/orlertv/livestream/playlist.m3u8
+#EXTINF:-1 group-title="Trentino Alto Adige",Passione lotto
+https://5dcabf026b188.streamlock.net/livevideo2/livestream/playlist.m3u8
+#EXTINF:-1 tvg-logo="https://www.davidefulgione.com/uploads/community/logo/u1_51e0c3ef4730.jpg" group-title="Trentino Alto Adie",Peer.tv
+https://iptv.peer.biz/live/peertv-it.m3u8
