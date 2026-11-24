@@ -243,7 +243,7 @@ kbd { font: 12px ui-monospace, Menlo, Consolas, monospace; border: 1px solid var
 .p-msg .acts { display: flex; gap: 8px; flex-wrap: wrap; justify-content: center; margin-top: 6px; }
 .p-msg .btn { background: rgba(255, 255, 255, .14); color: #fff; }
 .p-msg .btn.primary { background: #fff; color: #10151d; }
-.p-msg { overflow-y: auto; touch-action: pan-y; }
+.p-msg { overflow-y: auto; touch-action: pan-y; top: calc(env(safe-area-inset-top, 0px) + 60px); }   /* la barra in alto (indietro, preferito) resta toccabile */
 .p-det { width: 100%; margin-top: 4px; text-align: left; }
 .p-det summary { cursor: pointer; text-align: center; color: rgba(255, 255, 255, .75); font-size: 13.5px; padding: 6px; }
 .p-pre { white-space: pre-wrap; word-break: break-all; font: 11.5px/1.45 ui-monospace, Menlo, Consolas, monospace; max-height: 34vh; overflow: auto; background: rgba(255, 255, 255, .08); border-radius: 8px; padding: 10px; margin: 6px 0 0; color: #e6e9ee; user-select: text; -webkit-user-select: text; touch-action: pan-y; }
@@ -1130,22 +1130,6 @@ function plan(url) {
   else steps.push(hlsStep(u), mse ? { e: "ts", url: proxied ? proxify(u) : u } : null, { e: "native", url: proxied ? proxify(u) : u });
   return { steps: steps.filter(Boolean), proxied, live: k !== "file" };
 }
-// LINK RAI (mediapolis.rai.it/relinker): il server della Rai risponde con un rimando all'indirizzo vero del video,
-// a volte in http (bloccato da una pagina https) o verso un server che non permette la lettura da un sito web. Qui si
-// chiede l'indirizzo vero in formato XML (output=45) DAL TELEFONO (indirizzo italiano) e si riproduce quello, in https.
-const isRelinker = u => /^https?:\/\/mediapolis\.rai\.it\/relinker\//i.test(u);
-async function resolveRelinker(u) {
-  const x = new URL(u.replace(/^http:/i, "https:")); x.searchParams.set("output", "45");
-  const r = await fetchSmart(x.href); const t = await r.text(); P.raiXml = t.slice(0, 1500);
-  const cd = v => v.replace(/<!\[CDATA\[|\]\]>/g, "").trim();
-  const m = /<url\b[^>]*type="content"[^>]*>([\s\S]*?)<\/url>/i.exec(t) || /<url\b[^>]*>([\s\S]*?)<\/url>/i.exec(t);
-  if (!m) throw new Error("risposta Rai senza indirizzo");
-  const url = deEnt(cd(m[1]));
-  if (/video_no_available/i.test(url)) return { geo: true, url };
-  let la = "", lm = /<license_url\b[^>]*>([\s\S]*?)<\/license_url>/i.exec(t);
-  if (lm) { const raw = deEnt(cd(lm[1])); if (raw && raw !== "{}") { try { const j = JSON.parse(raw), arr = j.drmLicenseUrlValues || j.licenseUrlValues || []; const w = arr.find(v => /widevine/i.test(v.drm || "")) || arr[0]; la = w ? w.licenceUrl || w.licenseUrl || w.url || "" : ""; } catch (e) { if (/^https?:/i.test(raw)) la = raw; } if (!la) la = "?"; } }
-  return { url, la };
-}
 async function playIdx(idx) {
   const ch = P.list[idx]; if (!ch) return;
   P.idx = idx; P.ch = ch; P.started = false; P.retried = false; const token = ++P.token;
@@ -1156,20 +1140,11 @@ async function playIdx(idx) {
     navigator.mediaSession.setActionHandler("previoustrack", () => zap(-1)); navigator.mediaSession.setActionHandler("nexttrack", () => zap(1));
   } catch (e) {}
   // tra i tentativi falliti si mostra il motivo piu' utile (es. «errore 404» invece di «formato non supportato»)
-  let lastErr = null; const RANK = { geo: 8, http: 6, drm: 5, mixed: 4, network: 3, timeout: 2, format: 1, unknown: 0 };
+  let lastErr = null; const RANK = { http: 6, drm: 5, mixed: 4, network: 3, timeout: 2, format: 1, unknown: 0 };
   const keep = e => { if (!lastErr || (RANK[e && e.kind] ?? 0) >= (RANK[lastErr.kind] ?? 0)) lastErr = e; };
-  P.trace = []; P.raiXml = "";
-  const steps = [];
-  if (isRelinker(ch.url)) {
-    try {
-      const rr = await resolveRelinker(ch.url); if (token !== P.token) return;
-      P.trace.push({ e: "rai", kind: rr.geo ? "geo" : "ok", det: rr.url + (rr.la ? " · DRM " + rr.la : "") });
-      if (rr.geo) keep({ kind: "geo" });
-      else for (const st of plan(rr.url).steps) { if (rr.la && rr.la !== "?") st.la = rr.la; steps.push(st); }
-    } catch (e) { if (token !== P.token) return; P.trace.push({ e: "rai", kind: "network", det: String(e && e.message || e) }); }
-  }
-  const pl = plan(ch.url);
-  for (const st of pl.steps) if (!steps.some(x => x.e === st.e && x.url === st.url)) steps.push(st);
+  P.trace = [];
+  // si usa solo l'indirizzo scritto nella lista M3U, cosi' com'e'
+  const pl = plan(ch.url), steps = pl.steps;
   if (!steps.length) { spin(false); return showError(lastErr || { kind: "format" }, ch); }
   for (const st of steps) {
     if (token !== P.token) return;
@@ -1214,7 +1189,6 @@ function attempt(st, token, proxied) {
           e.det = "dash " + (er.code || "") + " " + msg.slice(0, 120);
           if (!P.started) ko(e); else showError(e, P.ch);
         });
-        if (st.la) dp.setProtectionData({ "com.widevine.alpha": { serverURL: st.la } });
         dp.initialize(video, st.url, true);
       } else if (st.e === "ts" || st.e === "flv") {
         await loadScript(LIB.ts); if (token !== P.token) return ko({ kind: "stale" });
@@ -1258,7 +1232,6 @@ async function diagText(ch, trace) {
   const t = c => { try { return ms && ms.isTypeSupported(c) ? "sì" : "no"; } catch (e) { return "?"; } };
   L.push("HLS nativo: " + (v.canPlayType("application/vnd.apple.mpegurl") || "no") + " · MSE " + (ms ? "sì" : "no") + " · AAC " + t('audio/mp4; codecs="mp4a.40.2"') + " · AC-3 " + t('audio/mp4; codecs="ac-3"') + " · E-AC-3 " + t('audio/mp4; codecs="ec-3"') + " · HEVC " + t('video/mp4; codecs="hvc1.1.6.L120.90"'));
   L.push("Tentativi:"); for (const x of trace) L.push("- " + x.e + ": " + x.kind + (x.code ? " " + x.code : "") + (x.det ? " (" + x.det + ")" : "") + (x.url && x.url !== ch.url ? " · " + x.url : "") + (x.eu && x.eu !== x.url ? " · su " + x.eu : ""));
-  if (P.raiXml) L.push("Risposta Rai:", P.raiXml);
   const probe = async (u, label) => {
     try {
       const ctl = new AbortController(), to = setTimeout(() => ctl.abort(), 10000);
@@ -1280,7 +1253,6 @@ function hideMsg() { $("pMsg").hidden = true; $("player").classList.remove("has-
 function showError(e, ch) {
   spin(false); if (!ch || ch !== P.ch) return;
   const T = {
-    geo: ["Canale visibile solo dall'Italia", "La Rai ha risposto che da questa connessione il canale non è disponibile. Se sei in Italia, prova senza VPN o con un'altra rete."],
     mixed: ["Canale bloccato dal browser", "Il canale usa un indirizzo http e questa pagina è https, quindi il browser non lo carica. Aprilo in un'altra app (come VLC) oppure imposta un proxy https nelle impostazioni."],
     network: ["Il canale non risponde", "Il server del canale non è raggiungibile o non permette la visione da un sito web. Può funzionare in un'altra app (come VLC) o con un proxy."],
     http: ["Il server ha rifiutato il canale", "Errore " + (e.code || "") + ": il canale potrebbe essere offline, cambiato di indirizzo o riservato agli abbonati."],
