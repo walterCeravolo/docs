@@ -1,0 +1,27 @@
+TIVÙ PLAYER - lettore IPTV nel browser
+
+COSA C'È IN QUESTA CARTELLA
+  index.html             l'app (tutto dentro: aspetto e codice)
+  manifest.webmanifest   per installarla sul telefono come un'app ("Aggiungi a schermata Home")
+  sw.js                  la fa aprire anche senza rete
+  icon*.png, icon.svg    icone
+  proxy-worker.js        FACOLTATIVO: proxy per i canali http (istruzioni dentro il file)
+
+COME METTERLA ONLINE (gratis, basta un sito statico qualsiasi)
+  - GitHub Pages: nuovo repository, carica questi file, Settings > Pages > Deploy from branch (main, / root).
+  - Cloudflare Pages o Netlify: "carica cartella" e scegli questa cartella.
+  Serve un indirizzo https:// (tutti questi servizi lo danno), altrimenti non si installa e Cast non compare.
+
+COSA FA
+  - Playlist M3U/M3U8 da link, da file, incollate o con accesso Xtream Codes; più playlist salvate.
+  - Schede: Preferiti, Recenti, Tutti i canali e una scheda per ogni gruppo (group-title). Scorri a destra/sinistra per cambiare scheda.
+  - Vista a griglia o a elenco, loghi (tvg-logo), ricerca, ordine A-Z.
+  - Lettore: HLS, DASH (senza DRM), MPEG-TS, FLV, MP4. Scorri in su/giù per cambiare canale, doppio tocco = schermo intero,
+    picture in picture, formato immagine, Chromecast (con Chrome), apertura in VLC/MX Player.
+  - Guida TV XMLTV (anche .gz): programma in onda e successivo, guida del giorno per ogni canale.
+
+LIMITI DEL BROWSER (non dell'app)
+  - Canali http:// su una pagina https://: il browser li blocca. Si aprono con "Apri in un'altra app" (VLC) oppure con il proxy.
+  - Alcuni server non permettono la visione da un sito web (CORS) o sono riservati all'Italia: stesso rimedio.
+  - I canali con DRM (cifrati) funzionano solo nelle app ufficiali.
+  - User-Agent e Referer personalizzati (#EXTVLCOPT) non si possono impostare da un browser.

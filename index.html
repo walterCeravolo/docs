@@ -1,0 +1,1428 @@
+<!doctype html>
+<html lang="it">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Tivù Player</title>
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="icon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="icon-192.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Tivù">
+<meta name="theme-color" content="#1b5fb5">
+<meta name="description" content="Lettore IPTV nel browser: playlist M3U, canali per gruppi, preferiti, guida TV.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap">
+<style>
+:root { padding-top: env(safe-area-inset-top, 0px); padding-bottom: env(safe-area-inset-bottom, 0px); }
+/* Layout: app a schermo intero, barra blu con schede dei gruppi in alto, canali sotto (griglia o elenco), lettore sovrapposto. */
+:root {
+  --bar: #1b5fb5;
+  --bar-deep: #154c93;
+  --on-bar: #ffffff;
+  --on-bar-dim: rgba(255, 255, 255, .72);
+  --bg: #eef1f6;
+  --surface: #ffffff;
+  --surface-2: #f3f5f9;
+  --tile: #ffffff;
+  --tile-line: #dfe4ec;
+  --fg: #141b26;
+  --muted: #5a6677;
+  --line: #dde3ec;
+  --accent: #1b66d2;
+  --accent-soft: #e2ebfa;
+  --star: #e09b00;
+  --danger: #c5221f;
+  --scrim: rgba(8, 14, 24, .5);
+  --shadow: 0 10px 30px rgba(10, 22, 44, .22);
+  --font: "Roboto", system-ui, -apple-system, "Segoe UI", Arial, sans-serif;
+  --tile-size: 52px;
+  --tile-min: 76px;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bar: #1d5aa8; --bar-deep: #17497f; --bg: #1c1f25; --surface: #262a31; --surface-2: #2e333b;
+    --tile: #f1f3f7; --tile-line: #f1f3f7; --fg: #e9ecf1; --muted: #9ba5b4; --line: #343a43;
+    --accent: #82b1ff; --accent-soft: #2b3a52; --star: #ffc53d; --danger: #ff8a80; --scrim: rgba(0, 0, 0, .6);
+    --shadow: 0 10px 30px rgba(0, 0, 0, .5); color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bar: #1d5aa8; --bar-deep: #17497f; --bg: #1c1f25; --surface: #262a31; --surface-2: #2e333b;
+  --tile: #f1f3f7; --tile-line: #f1f3f7; --fg: #e9ecf1; --muted: #9ba5b4; --line: #343a43;
+  --accent: #82b1ff; --accent-soft: #2b3a52; --star: #ffc53d; --danger: #ff8a80; --scrim: rgba(0, 0, 0, .6);
+  --shadow: 0 10px 30px rgba(0, 0, 0, .5); color-scheme: dark;
+}
+*, *::before, *::after { box-sizing: border-box; }
+html { height: 100%; }
+body { height: 100%; margin: 0; background: var(--bg); color: var(--fg); font: 400 14px/1.4 var(--font); -webkit-tap-highlight-color: transparent; overflow: hidden; }
+body::before { content: ""; position: fixed; inset: 0 0 auto; height: env(safe-area-inset-top, 0px); z-index: 10; background: var(--bar-deep); }
+[hidden] { display: none !important; }
+button { font: inherit; color: inherit; }
+input, textarea, select { font: inherit; color: var(--fg); }
+img { max-width: 100%; }
+.i { width: 24px; height: 24px; fill: currentColor; flex: none; display: block; }
+:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+
+#app { height: 100%; display: flex; flex-direction: column; padding-left: env(safe-area-inset-left, 0px); padding-right: env(safe-area-inset-right, 0px); }
+.top { background: var(--bar); color: var(--on-bar); flex: none; box-shadow: 0 2px 6px rgba(0, 0, 0, .18); position: relative; z-index: 2; }
+.appbar, .searchbar { height: 56px; display: flex; align-items: center; gap: 2px; padding: 0 4px; }
+.title { flex: 1; min-width: 0; font-size: 20px; font-weight: 500; padding-left: 20px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; letter-spacing: .1px; }
+.ib { width: 48px; height: 48px; border: 0; background: none; border-radius: 50%; display: grid; place-items: center; cursor: pointer; color: inherit; flex: none; }
+.ib:hover { background: rgba(127, 127, 127, .14); }
+.ib:active { background: rgba(127, 127, 127, .24); }
+.searchbar input { flex: 1; min-width: 0; height: 40px; border: 0; background: transparent; color: var(--on-bar); font-size: 18px; outline: none; padding: 0 8px; }
+.searchbar input::placeholder { color: var(--on-bar-dim); }
+.searchbar input::-webkit-search-cancel-button { display: none; }
+.tabs { display: flex; overflow-x: auto; scrollbar-width: none; padding: 0 4px; }
+.tabs::-webkit-scrollbar { display: none; }
+.tab { flex: none; border: 0; background: none; color: var(--on-bar-dim); height: 48px; padding: 0 16px; font-size: 14px; font-weight: 500; text-transform: uppercase; letter-spacing: .6px; cursor: pointer; position: relative; white-space: nowrap; }
+.tab[aria-selected="true"] { color: var(--on-bar); }
+.tab[aria-selected="true"]::after { content: ""; position: absolute; left: 8px; right: 8px; bottom: 0; height: 3px; border-radius: 3px 3px 0 0; background: var(--on-bar); }
+.tab .n { font-weight: 400; opacity: .7; margin-left: 4px; }
+.loadbar { position: absolute; left: 0; right: 0; bottom: 0; height: 3px; overflow: hidden; }
+.loadbar i { position: absolute; top: 0; bottom: 0; width: 35%; background: #9cc3ff; animation: lb 1.1s ease-in-out infinite; }
+@keyframes lb { from { left: -35%; } to { left: 100%; } }
+.status { background: var(--accent-soft); color: var(--fg); font-size: 13px; padding: 8px 16px; display: flex; gap: 12px; align-items: center; }
+.status span { flex: 1; min-width: 0; }
+.status button { border: 0; background: none; color: var(--accent); font-weight: 500; text-transform: uppercase; font-size: 13px; letter-spacing: .4px; cursor: pointer; padding: 6px 4px; }
+
+#main { flex: 1; min-height: 0; overflow-y: auto; overscroll-behavior: contain; -webkit-overflow-scrolling: touch; }
+.res-h { padding: 14px 16px 4px; color: var(--muted); font-size: 13px; }
+#list.grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(var(--tile-min), 1fr)); gap: 2px 0; padding: 8px 4px 24px; }
+#list.rows { display: flex; flex-direction: column; padding-bottom: 24px; }
+.ch { border: 0; background: none; cursor: pointer; text-align: left; -webkit-touch-callout: none; user-select: none; -webkit-user-select: none; position: relative; }
+.grid .ch { display: flex; flex-direction: column; align-items: center; gap: 6px; padding: 10px 2px 8px; border-radius: 10px; min-width: 0; }
+.grid .ch:hover { background: rgba(127, 127, 127, .1); }
+.grid .nm { font-size: 12.5px; color: var(--fg); text-align: center; width: 100%; overflow: hidden; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; line-height: 1.25; word-break: break-word; }
+.rows .ch { display: flex; align-items: center; gap: 16px; min-height: 68px; padding: 8px max(16px, env(safe-area-inset-right, 0px)) 8px max(16px, env(safe-area-inset-left, 0px)); border-bottom: 1px solid var(--line); background: var(--surface); }
+.rows .ch:hover { background: var(--surface-2); }
+.rows .tx { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 2px; }
+.rows .nm { font-size: 16px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.rows .sub { font-size: 13px; color: var(--muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.pb { height: 3px; border-radius: 2px; background: var(--line); overflow: hidden; margin-top: 4px; max-width: 220px; }
+.pb i { display: block; height: 100%; background: var(--accent); }
+.av { width: var(--tile-size); height: var(--tile-size); flex: none; border-radius: 10px; background: var(--tile); border: 1px solid var(--tile-line); display: grid; place-items: center; overflow: hidden; position: relative; }
+.rows .av { width: 46px; height: 46px; }
+.av img { width: 86%; height: 86%; object-fit: contain; position: absolute; inset: 7%; opacity: 0; transition: opacity .15s; }
+.av.has-logo img { opacity: 1; }
+.av.has-logo b { visibility: hidden; }
+.av b { width: 72%; height: 72%; border-radius: 50%; display: grid; place-items: center; color: #fff; font-weight: 500; font-size: calc(var(--tile-size) * .36); background: var(--c, #5c6bc0); }
+.rows .av b { font-size: 17px; }
+.favdot { position: absolute; top: 6px; right: 8px; color: var(--star); }
+.grid .favdot .i { width: 16px; height: 16px; }
+.rows .favdot { position: static; }
+.rows .favdot .i { width: 20px; height: 20px; }
+.empty { padding: 56px 24px; text-align: center; color: var(--muted); max-width: 420px; margin: 0 auto; display: flex; flex-direction: column; align-items: center; gap: 10px; }
+.empty .i { width: 56px; height: 56px; opacity: .45; }
+.empty h3 { margin: 0; color: var(--fg); font-size: 17px; font-weight: 500; text-wrap: balance; }
+.empty p { margin: 0; line-height: 1.5; }
+
+/* strati: menu laterale, menu, fogli, finestre */
+.scrim { position: fixed; inset: 0; background: var(--scrim); z-index: 20; animation: fade .18s ease-out; }
+@keyframes fade { from { opacity: 0; } }
+.drawer { position: fixed; top: 0; bottom: 0; left: 0; width: min(320px, 86vw); background: var(--surface); z-index: 21; display: flex; flex-direction: column; box-shadow: var(--shadow); animation: slide .2s ease-out; padding-bottom: env(safe-area-inset-bottom, 0px); }
+@keyframes slide { from { transform: translateX(-100%); } }
+.dr-head { background: var(--bar); color: var(--on-bar); padding: calc(env(safe-area-inset-top, 0px) + 22px) 20px 18px max(20px, env(safe-area-inset-left, 0px)); display: flex; gap: 14px; align-items: center; }
+.dr-head svg.logo { width: 48px; height: 48px; flex: none; }
+.dr-head b { display: block; font-size: 19px; font-weight: 500; }
+.dr-head small { color: var(--on-bar-dim); font-size: 13px; }
+.dr-body { flex: 1; overflow-y: auto; padding: 8px 0; }
+.dr-label { font-size: 12px; font-weight: 500; color: var(--muted); padding: 12px 20px 6px; text-transform: uppercase; letter-spacing: .8px; }
+.dr-item { display: flex; align-items: center; gap: 18px; width: 100%; border: 0; background: none; padding: 0 8px 0 20px; min-height: 52px; cursor: pointer; text-align: left; color: var(--fg); }
+.dr-item:hover { background: var(--surface-2); }
+.dr-item .i { color: var(--muted); }
+.dr-item .tx { flex: 1; min-width: 0; }
+.dr-item .tx b { display: block; font-weight: 500; font-size: 15px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.dr-item .tx small { color: var(--muted); font-size: 12.5px; }
+.dr-item.on { background: var(--accent-soft); }
+.dr-item.on .i, .dr-item.on b { color: var(--accent); }
+.dr-sep { height: 1px; background: var(--line); margin: 8px 0; }
+.menu { position: fixed; z-index: 31; top: calc(env(safe-area-inset-top, 0px) + 8px); right: calc(env(safe-area-inset-right, 0px) + 8px); background: var(--surface); border-radius: 8px; box-shadow: var(--shadow); padding: 8px 0; min-width: 240px; max-width: calc(100vw - 16px); animation: pop .14s ease-out; transform-origin: top right; }
+@keyframes pop { from { opacity: 0; transform: scale(.92); } }
+.menu button { display: flex; width: 100%; align-items: center; gap: 16px; border: 0; background: none; padding: 0 20px 0 16px; height: 48px; cursor: pointer; font-size: 15px; text-align: left; color: var(--fg); }
+.menu button:hover { background: var(--surface-2); }
+.menu button .i { color: var(--muted); }
+.menu .chk { margin-left: auto; color: var(--accent); }
+.menu-sep { height: 1px; background: var(--line); margin: 6px 0; }
+.menu-label { font-size: 12px; color: var(--muted); padding: 8px 16px 4px; text-transform: uppercase; letter-spacing: .8px; }
+.sheet { position: fixed; left: 0; right: 0; bottom: 0; z-index: 31; background: var(--surface); border-radius: 16px 16px 0 0; box-shadow: var(--shadow); max-height: 82vh; overflow-y: auto; padding: 8px 0 calc(env(safe-area-inset-bottom, 0px) + 8px); animation: up .2s ease-out; max-width: 640px; margin: 0 auto; }
+@keyframes up { from { transform: translateY(100%); } }
+.sh-head { display: flex; gap: 14px; align-items: center; padding: 14px 20px 12px; border-bottom: 1px solid var(--line); margin-bottom: 6px; }
+.sh-head .tx { min-width: 0; flex: 1; }
+.sh-head b { display: block; font-size: 16px; font-weight: 500; overflow-wrap: anywhere; }
+.sh-head small { color: var(--muted); font-size: 13px; display: block; }
+.sheet .menu-btn { display: flex; width: 100%; align-items: center; gap: 20px; border: 0; background: none; padding: 0 20px; min-height: 52px; cursor: pointer; font-size: 15px; text-align: left; color: var(--fg); }
+.sheet .menu-btn:hover { background: var(--surface-2); }
+.sheet .menu-btn .i { color: var(--muted); }
+.sheet .menu-btn.danger, .sheet .menu-btn.danger .i { color: var(--danger); }
+.guide { list-style: none; margin: 0; padding: 0 20px 12px; }
+.guide li { display: grid; grid-template-columns: 54px 1fr; gap: 10px; padding: 9px 0; border-bottom: 1px solid var(--line); }
+.guide time { color: var(--muted); font-variant-numeric: tabular-nums; font-size: 13px; padding-top: 1px; }
+.guide li.now time, .guide li.now b { color: var(--accent); }
+.guide b { font-weight: 500; display: block; }
+.guide p { margin: 2px 0 0; color: var(--muted); font-size: 13px; }
+.dlg-wrap { position: fixed; inset: 0; z-index: 40; background: var(--scrim); display: grid; place-items: center; padding: max(16px, env(safe-area-inset-top, 0px)) max(16px, env(safe-area-inset-right, 0px)) max(16px, env(safe-area-inset-bottom, 0px)) max(16px, env(safe-area-inset-left, 0px)); animation: fade .15s ease-out; }
+.dlg { background: var(--surface); border-radius: 14px; box-shadow: var(--shadow); width: 100%; max-width: 440px; max-height: 100%; display: flex; flex-direction: column; animation: pop .16s ease-out; }
+.dlg.wide { max-width: 560px; }
+.dlg-t { margin: 0; font-size: 20px; font-weight: 500; padding: 22px 24px 8px; text-wrap: balance; }
+.dlg-b { padding: 8px 24px; overflow-y: auto; display: flex; flex-direction: column; gap: 14px; min-height: 0; }
+.dlg-b p { margin: 0; line-height: 1.5; color: var(--muted); }
+.dlg-a { display: flex; justify-content: flex-end; gap: 8px; padding: 12px 16px 16px; flex-wrap: wrap; }
+.btn { border: 0; border-radius: 20px; height: 40px; padding: 0 18px; font-weight: 500; font-size: 14px; letter-spacing: .3px; cursor: pointer; }
+.btn.text { background: none; color: var(--accent); }
+.btn.text:hover { background: var(--accent-soft); }
+.btn.primary { background: var(--accent); color: var(--surface); }
+.btn.primary:disabled { opacity: .5; cursor: default; }
+.fld { display: flex; flex-direction: column; gap: 6px; }
+.fld label { font-size: 13px; font-weight: 500; color: var(--muted); }
+.fld input, .fld textarea, .fld select { width: 100%; border: 1px solid var(--line); background: var(--surface-2); border-radius: 8px; padding: 11px 12px; font-size: 15px; outline: none; }
+.fld input:focus, .fld textarea:focus, .fld select:focus { border-color: var(--accent); }
+.fld textarea { min-height: 130px; resize: vertical; font-family: ui-monospace, "SF Mono", Menlo, Consolas, monospace; font-size: 12.5px; }
+.fld .hint { font-size: 12.5px; color: var(--muted); line-height: 1.45; }
+.seg { display: flex; background: var(--surface-2); border-radius: 10px; padding: 3px; gap: 2px; }
+.seg button { flex: 1; border: 0; background: none; border-radius: 8px; height: 36px; font-size: 13.5px; font-weight: 500; color: var(--muted); cursor: pointer; }
+.seg button[aria-pressed="true"] { background: var(--surface); color: var(--accent); box-shadow: 0 1px 3px rgba(0, 0, 0, .15); }
+.chips { display: flex; flex-wrap: wrap; gap: 8px; }
+.chip { border: 1px solid var(--line); background: var(--surface); border-radius: 16px; height: 32px; padding: 0 12px; font-size: 13px; cursor: pointer; color: var(--fg); }
+.chip:hover { border-color: var(--accent); color: var(--accent); }
+.err { color: var(--danger); font-size: 13.5px; line-height: 1.45; }
+.set-sec { font-size: 12px; font-weight: 500; color: var(--accent); text-transform: uppercase; letter-spacing: .8px; margin-top: 6px; }
+.sw { display: flex; align-items: center; gap: 14px; cursor: pointer; }
+.sw .tx { flex: 1; min-width: 0; }
+.sw .tx b { display: block; font-weight: 400; font-size: 15px; }
+.sw .tx small { color: var(--muted); font-size: 12.5px; line-height: 1.4; display: block; }
+.sw input { appearance: none; -webkit-appearance: none; width: 40px; height: 24px; border-radius: 12px; background: var(--line); position: relative; cursor: pointer; flex: none; transition: background .15s; margin: 0; }
+.sw input::after { content: ""; position: absolute; top: 3px; left: 3px; width: 18px; height: 18px; border-radius: 50%; background: var(--surface); box-shadow: 0 1px 3px rgba(0, 0, 0, .3); transition: transform .15s; }
+.sw input:checked { background: var(--accent); }
+.sw input:checked::after { transform: translateX(16px); }
+.help { margin: 0; padding-left: 18px; color: var(--muted); line-height: 1.55; display: flex; flex-direction: column; gap: 6px; }
+.help b { color: var(--fg); font-weight: 500; }
+kbd { font: 12px ui-monospace, Menlo, Consolas, monospace; border: 1px solid var(--line); border-radius: 4px; padding: 1px 5px; background: var(--surface-2); color: var(--fg); }
+.toast { position: fixed; left: 50%; bottom: calc(env(safe-area-inset-bottom, 0px) + 24px); transform: translateX(-50%); z-index: 60; background: #2b3038; color: #f2f4f7; border-radius: 8px; padding: 12px 18px; font-size: 14px; box-shadow: var(--shadow); max-width: calc(100vw - 32px); animation: fade .2s ease-out; }
+
+/* lettore */
+.player { position: fixed; inset: 0; z-index: 50; background: #000; color: #fff; overflow: hidden; touch-action: none; user-select: none; -webkit-user-select: none; }
+.player video { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: contain; background: #000; }
+.player.fit-cover video { object-fit: cover; }
+.player.fit-fill video { object-fit: fill; }
+.p-ui { position: absolute; inset: 0; display: flex; flex-direction: column; justify-content: space-between; opacity: 0; transition: opacity .2s; pointer-events: none; }
+.p-ui.show { opacity: 1; pointer-events: auto; }
+.p-top { display: flex; align-items: center; gap: 2px; padding: calc(env(safe-area-inset-top, 0px) + 4px) max(4px, env(safe-area-inset-right, 0px)) 28px max(4px, env(safe-area-inset-left, 0px)); background: linear-gradient(rgba(0, 0, 0, .72), transparent); }
+.p-title { flex: 1; min-width: 0; padding-left: 8px; }
+.p-title div:first-child { font-size: 18px; font-weight: 500; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.p-title div:last-child { font-size: 13px; color: rgba(255, 255, 255, .72); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.p-mid { display: flex; align-items: center; justify-content: center; gap: 28px; }
+.p-mid .ib { background: rgba(0, 0, 0, .38); }
+.p-mid .big { width: 56px; height: 56px; }
+.p-mid .big .i { width: 32px; height: 32px; }
+.p-mid .huge { width: 72px; height: 72px; }
+.p-mid .huge .i { width: 44px; height: 44px; }
+.p-bot { padding: 32px max(12px, env(safe-area-inset-right, 0px)) calc(env(safe-area-inset-bottom, 0px) + 8px) max(12px, env(safe-area-inset-left, 0px)); background: linear-gradient(transparent, rgba(0, 0, 0, .78)); display: flex; flex-direction: column; gap: 4px; }
+.p-row { display: flex; align-items: center; gap: 2px; }
+.p-epg { flex: 1; min-width: 0; font-size: 13.5px; padding-left: 4px; display: flex; flex-direction: column; gap: 2px; }
+.p-epg .now { font-weight: 500; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.p-epg .next { color: rgba(255, 255, 255, .7); font-size: 12.5px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.p-epg .pb { background: rgba(255, 255, 255, .25); max-width: 320px; }
+.p-epg .pb i { background: #fff; }
+.p-live { display: inline-flex; align-items: center; gap: 6px; font-size: 12px; font-weight: 700; letter-spacing: .8px; }
+.p-live::before { content: ""; width: 8px; height: 8px; border-radius: 50%; background: #ff4d4d; }
+.p-seek { display: flex; align-items: center; gap: 10px; font-size: 12.5px; font-variant-numeric: tabular-nums; padding: 0 4px; }
+.p-seek input { flex: 1; min-width: 0; accent-color: #fff; }
+.p-spin { position: absolute; inset: 0; display: grid; place-items: center; pointer-events: none; }
+.p-spin i { width: 48px; height: 48px; border-radius: 50%; border: 4px solid rgba(255, 255, 255, .25); border-top-color: #fff; animation: spin .8s linear infinite; }
+@keyframes spin { to { transform: rotate(360deg); } }
+.p-msg { position: absolute; inset: 0; display: grid; place-items: center; padding: 24px; z-index: 2; background: rgba(0, 0, 0, .82); }
+.player.has-msg .p-mid, .player.has-msg #pSpin { visibility: hidden; }
+.p-msg .box { max-width: 440px; text-align: center; display: flex; flex-direction: column; align-items: center; gap: 10px; }
+.p-msg .i { width: 44px; height: 44px; opacity: .85; }
+.p-msg h3 { margin: 0; font-size: 18px; font-weight: 500; text-wrap: balance; }
+.p-msg p { margin: 0; color: rgba(255, 255, 255, .8); line-height: 1.5; font-size: 14px; }
+.p-msg .acts { display: flex; gap: 8px; flex-wrap: wrap; justify-content: center; margin-top: 6px; }
+.p-msg .btn { background: rgba(255, 255, 255, .14); color: #fff; }
+.p-msg .btn.primary { background: #fff; color: #10151d; }
+.p-zap { position: absolute; top: calc(env(safe-area-inset-top, 0px) + 72px); left: 50%; transform: translateX(-50%); background: rgba(0, 0, 0, .7); border-radius: 10px; padding: 10px 16px; font-size: 15px; font-weight: 500; pointer-events: none; max-width: 80vw; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.p-cast { position: absolute; inset: 0; display: grid; place-items: center; text-align: center; color: rgba(255, 255, 255, .85); padding: 24px; }
+.p-cast .i { width: 56px; height: 56px; margin: 0 auto 10px; }
+@media (prefers-reduced-motion: reduce) { *, *::before, *::after { animation-duration: .001s !important; transition-duration: .001s !important; } }
+</style>
+
+</head>
+<body>
+<div id="app">
+  <header class="top">
+    <div class="appbar" id="appbar">
+      <button class="ib" id="btnMenu" type="button" aria-label="Apri il menu"></button>
+      <div class="title" id="title">Tivù</div>
+      <button class="ib" id="btnSearch" type="button" aria-label="Cerca"></button>
+      <button class="ib" id="btnView" type="button" aria-label="Cambia vista"></button>
+      <button class="ib" id="btnCast" type="button" aria-label="Trasmetti" hidden></button>
+      <button class="ib" id="btnMore" type="button" aria-label="Altre opzioni"></button>
+    </div>
+    <div class="searchbar" id="searchbar" hidden>
+      <button class="ib" id="btnSearchBack" type="button" aria-label="Chiudi la ricerca"></button>
+      <input id="q" type="search" placeholder="Cerca un canale" autocomplete="off" enterkeyhint="search" aria-label="Cerca un canale">
+      <button class="ib" id="btnSearchClear" type="button" aria-label="Cancella"></button>
+    </div>
+    <nav class="tabs" id="tabs" role="tablist" aria-label="Gruppi di canali"></nav>
+    <div class="loadbar" id="loadbar" hidden><i></i></div>
+  </header>
+  <div class="status" id="status" hidden><span id="statusText"></span><button type="button" id="statusBtn"></button></div>
+  <main id="main">
+    <div class="res-h" id="resHead" hidden></div>
+    <div id="list" class="grid"></div>
+    <div id="sentinel" style="height:1px"></div>
+    <div id="empty" class="empty" hidden></div>
+  </main>
+</div>
+
+<section class="player" id="player" hidden aria-label="Lettore">
+  <video id="video" playsinline webkit-playsinline preload="auto"></video>
+  <div class="p-cast" id="pCastInfo" hidden></div>
+  <div class="p-spin" id="pSpin" hidden><i></i></div>
+  <div class="p-ui" id="pUi">
+    <div class="p-top">
+      <button class="ib" id="pBack" type="button" aria-label="Chiudi il lettore"></button>
+      <div class="p-title"><div id="pName"></div><div id="pSub"></div></div>
+      <button class="ib" id="pFav" type="button" aria-label="Preferito"></button>
+      <button class="ib" id="pCast" type="button" aria-label="Trasmetti alla TV" hidden></button>
+      <button class="ib" id="pPip" type="button" aria-label="Picture in picture" hidden></button>
+      <button class="ib" id="pExt" type="button" aria-label="Apri in un'altra app"></button>
+    </div>
+    <div class="p-mid">
+      <button class="ib big" id="pPrev" type="button" aria-label="Canale precedente"></button>
+      <button class="ib huge" id="pPlay" type="button" aria-label="Riproduci o metti in pausa"></button>
+      <button class="ib big" id="pNext" type="button" aria-label="Canale successivo"></button>
+    </div>
+    <div class="p-bot">
+      <div class="p-seek" id="pSeek" hidden><span id="pCur">0:00</span><input type="range" id="pRange" min="0" max="1000" value="0" aria-label="Posizione"><span id="pDur">0:00</span></div>
+      <div class="p-row">
+        <div class="p-epg" id="pEpg"></div>
+        <button class="ib" id="pMute" type="button" aria-label="Audio"></button>
+        <button class="ib" id="pFit" type="button" aria-label="Formato immagine"></button>
+        <button class="ib" id="pFull" type="button" aria-label="Schermo intero"></button>
+      </div>
+    </div>
+  </div>
+  <div class="p-zap" id="pZap" hidden></div>
+  <div class="p-msg" id="pMsg" hidden></div>
+</section>
+
+<script>
+"use strict";
+// ======================= icone (Material Icons, Apache 2.0) =======================
+const I = {
+  menu: "M3 18h18v-2H3v2zm0-5h18v-2H3v2zm0-7v2h18V6H3z",
+  search: "M15.5 14h-.79l-.28-.27A6.47 6.47 0 0 0 16 9.5 6.5 6.5 0 1 0 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z",
+  grid: "M4 8h4V4H4v4zm6 12h4v-4h-4v4zm-6 0h4v-4H4v4zm0-6h4v-4H4v4zm6 0h4v-4h-4v4zm6-10v4h4V4h-4zm-6 4h4V4h-4v4zm6 6h4v-4h-4v4zm0 6h4v-4h-4v4z",
+  list: "M3 14h4v-4H3v4zm0 5h4v-4H3v4zM3 9h4V5H3v4zm5 5h13v-4H8v4zm0 5h13v-4H8v4zM8 5v4h13V5H8z",
+  cast: "M1 18v3h3c0-1.66-1.34-3-3-3zm0-4v2c2.76 0 5 2.24 5 5h2c0-3.87-3.13-7-7-7zm0-4v2a9 9 0 0 1 9 9h2c0-6.08-4.93-11-11-11zm20-7H3c-1.1 0-2 .9-2 2v3h2V5h18v14h-7v2h7c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2z",
+  more: "M12 8c1.1 0 2-.9 2-2s-.9-2-2-2-2 .9-2 2 .9 2 2 2zm0 2c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2zm0 6c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2z",
+  back: "M20 11H7.83l5.59-5.59L12 4l-8 8 8 8 1.41-1.41L7.83 13H20v-2z",
+  close: "M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z",
+  star: "M12 17.27 18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z",
+  starO: "M22 9.24l-7.19-.62L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21 12 17.27 18.18 21l-1.63-7.03L22 9.24zM12 15.4l-3.76 2.27 1-4.28-3.32-2.88 4.38-.38L12 6.1l1.71 4.04 4.38.38-3.32 2.88 1 4.28L12 15.4z",
+  prev: "M6 6h2v12H6zm3.5 6 8.5 6V6z",
+  next: "M6 18l8.5-6L6 6v12zM16 6v12h2V6h-2z",
+  play: "M8 5v14l11-7z",
+  pause: "M6 19h4V5H6v14zm8-14v14h4V5h-4z",
+  full: "M7 14H5v5h5v-2H7v-3zm-2-4h2V7h3V5H5v5zm12 7h-3v2h5v-5h-2v3zM14 5v2h3v3h2V5h-5z",
+  fullX: "M5 16h3v3h2v-5H5v2zm3-8H5v2h5V5H8v3zm6 11h2v-3h3v-2h-5v5zm2-11V5h-2v5h5V8h-3z",
+  pip: "M19 11h-8v6h8v-6zm4 8V4.98C23 3.88 22.1 3 21 3H3c-1.1 0-2 .88-2 1.98V19c0 1.1.9 2 2 2h18c1.1 0 2-.9 2-2zm-2 .02H3V4.97h18v14.05z",
+  ext: "M19 19H5V5h7V3H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14c1.1 0 2-.9 2-2v-7h-2v7zM14 3v2h3.59l-9.83 9.83 1.41 1.41L19 6.41V10h2V3h-7z",
+  add: "M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z",
+  playlist: "M19 9H2v2h17V9zm0-4H2v2h17V5zM2 15h13v-2H2v2zm15-2v6l5-3-5-3z",
+  settings: "M19.14 12.94c.04-.3.06-.61.06-.94 0-.32-.02-.64-.07-.94l2.03-1.58a.49.49 0 0 0 .12-.61l-1.92-3.32a.49.49 0 0 0-.59-.22l-2.39.96c-.5-.38-1.03-.7-1.62-.94l-.36-2.54a.48.48 0 0 0-.48-.41h-3.84c-.24 0-.43.17-.47.41l-.36 2.54c-.59.24-1.13.57-1.62.94l-2.39-.96a.49.49 0 0 0-.59.22L2.74 8.87c-.12.21-.08.47.12.61l2.03 1.58c-.05.3-.09.63-.09.94s.02.64.07.94l-2.03 1.58a.49.49 0 0 0-.12.61l1.92 3.32c.12.22.37.29.59.22l2.39-.96c.5.38 1.03.7 1.62.94l.36 2.54c.05.24.24.41.48.41h3.84c.24 0 .44-.17.47-.41l.36-2.54c.59-.24 1.13-.56 1.62-.94l2.39.96c.22.08.47 0 .59-.22l1.92-3.32c.12-.22.07-.47-.12-.61l-2.01-1.58zM12 15.6A3.6 3.6 0 1 1 12 8.4a3.6 3.6 0 0 1 0 7.2z",
+  info: "M11 7h2v2h-2zm0 4h2v6h-2zm1-9C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8z",
+  refresh: "M17.65 6.35A7.96 7.96 0 0 0 12 4c-4.42 0-7.99 3.58-7.99 8s3.57 8 7.99 8c3.73 0 6.84-2.55 7.73-6h-2.08A5.99 5.99 0 0 1 12 18c-3.31 0-6-2.69-6-6s2.69-6 6-6c1.66 0 3.14.69 4.22 1.78L13 11h7V4l-2.35 2.35z",
+  sort: "M3 18h6v-2H3v2zM3 6v2h18V6H3zm0 7h12v-2H3v2z",
+  edit: "M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zM20.71 7.04a1 1 0 0 0 0-1.41l-2.34-2.34a1 1 0 0 0-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83z",
+  del: "M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z",
+  copy: "M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z",
+  tv: "M21 6h-7.59l3.29-3.29L16 2l-4 4-4-4-.71.71L10.59 6H3a2 2 0 0 0-2 2v12c0 1.1.9 2 2 2h18c1.1 0 2-.9 2-2V8a2 2 0 0 0-2-2zm0 14H3V8h18v12zM9 10v8l7-4z",
+  guide: "M11.99 2C6.47 2 2 6.48 2 12s4.47 10 9.99 10C17.52 22 22 17.52 22 12S17.52 2 11.99 2zM12 20c-4.42 0-8-3.58-8-8s3.58-8 8-8 8 3.58 8 8-3.58 8-8 8zm.5-13H11v6l5.25 3.15.75-1.23-4.5-2.67z",
+  check: "M9 16.17 4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z",
+  vol: "M3 9v6h4l5 5V4L7 9H3zm13.5 3A4.5 4.5 0 0 0 14 7.97v8.05c1.48-.73 2.5-2.25 2.5-4.02zM14 3.23v2.06c2.89.86 5 3.54 5 6.71s-2.11 5.85-5 6.71v2.06c4.01-.91 7-4.49 7-8.77s-2.99-7.86-7-8.77z",
+  volX: "M16.5 12A4.5 4.5 0 0 0 14 7.97v2.21l2.45 2.45c.03-.2.05-.41.05-.63zm2.5 0c0 .94-.2 1.82-.54 2.64l1.51 1.51A8.8 8.8 0 0 0 21 12c0-4.28-2.99-7.86-7-8.77v2.06c2.89.86 5 3.54 5 6.71zM4.27 3 3 4.27 7.73 9H3v6h4l5 5v-6.73l4.25 4.25c-.67.52-1.42.93-2.25 1.18v2.06a9 9 0 0 0 3.69-1.81L19.73 21 21 19.73l-9-9L4.27 3zM12 4 9.91 6.09 12 8.18V4z",
+  aspect: "M19 12h-2v3h-3v2h5v-5zM7 9h3V7H5v5h2V9zm14-6H3c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h18c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm0 16.01H3V4.99h18v14.02z",
+  error: "M11 15h2v2h-2zm0-8h2v6h-2zm.99-5C6.47 2 2 6.48 2 12s4.47 10 9.99 10C17.52 22 22 17.52 22 12S17.52 2 11.99 2zM12 20c-4.42 0-8-3.58-8-8s3.58-8 8-8 8 3.58 8 8-3.58 8-8 8z",
+  history: "M13 3a9 9 0 0 0-9 9H1l3.89 3.89.07.14L9 12H6c0-3.87 3.13-7 7-7s7 3.13 7 7-3.13 7-7 7c-1.93 0-3.68-.79-4.94-2.06l-1.42 1.42A8.95 8.95 0 0 0 13 21a9 9 0 0 0 0-18zm-1 5v5l4.28 2.54.72-1.21-3.5-2.08V8H12z",
+};
+const LOGO_SVG = '<svg class="logo" viewBox="0 0 48 48" aria-hidden="true"><rect x="2" y="2" width="44" height="44" rx="12" fill="#fff"/><rect x="9" y="14" width="30" height="21" rx="4" fill="#1b5fb5"/><path d="M21 19.5v10l8-5z" fill="#fff"/><path d="M18 9l6 5 6-5" stroke="#1b5fb5" stroke-width="2.4" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+
+// ======================= utilita' =======================
+const $ = id => document.getElementById(id);
+function icon(n) { const t = document.createElement("template"); t.innerHTML = '<svg class="i" viewBox="0 0 24 24" aria-hidden="true"><path d="' + I[n] + '"/></svg>'; return t.content.firstChild; }
+function setIcon(btn, n) { btn.replaceChildren(icon(n)); }
+function h(tag, props, ...kids) {
+  const e = document.createElement(tag);
+  if (props) for (const k in props) {
+    const v = props[k]; if (v == null || v === false) continue;
+    if (k === "class") e.className = v; else if (k === "text") e.textContent = v; else if (k === "html") e.innerHTML = v;
+    else if (k.startsWith("on")) e.addEventListener(k.slice(2), v); else if (k === "style") e.style.cssText = v;
+    else e.setAttribute(k, v === true ? "" : v);
+  }
+  for (const c of kids.flat()) if (c != null && c !== false) e.append(c.nodeType ? c : String(c));
+  return e;
+}
+const store = {
+  get(k, d) { try { const v = localStorage.getItem("tivu." + k); return v == null ? d : JSON.parse(v); } catch (e) { return d; } },
+  set(k, v) { try { localStorage.setItem("tivu." + k, JSON.stringify(v)); } catch (e) {} },
+  del(k) { try { localStorage.removeItem("tivu." + k); } catch (e) {} },
+};
+function hash(s) { let x = 2166136261; for (let i = 0; i < s.length; i++) { x ^= s.charCodeAt(i); x = Math.imul(x, 16777619); } return (x >>> 0).toString(36); }
+function norm(s) { return String(s || "").normalize("NFD").replace(/[̀-ͯ]/g, "").toLowerCase(); }
+function normName(s) { return norm(s).replace(/\b(hd|fhd|uhd|sd|4k|hevc|h265|backup)\b/g, "").replace(/[^a-z0-9]/g, ""); }
+const pad = n => String(n).padStart(2, "0");
+const hm = t => { const d = new Date(t); return pad(d.getHours()) + ":" + pad(d.getMinutes()); };
+const dur = s => { s = Math.max(0, Math.floor(s || 0)); const hh = Math.floor(s / 3600), m = Math.floor(s / 60) % 60, ss = s % 60; return (hh ? hh + ":" + pad(m) : m) + ":" + pad(ss); };
+let toastT = 0;
+function toast(msg, ms) {
+  let t = $("toast"); if (!t) { t = h("div", { id: "toast", class: "toast", role: "status" }); document.body.append(t); }
+  t.textContent = msg; t.hidden = false; clearTimeout(toastT); toastT = setTimeout(() => { t.hidden = true; }, ms || 2600);
+}
+const scripts = {};
+function loadScript(src) {
+  if (scripts[src]) return scripts[src];
+  return scripts[src] = new Promise((res, rej) => {
+    const s = document.createElement("script"); s.src = src; s.async = true; s.crossOrigin = "anonymous";
+    s.onload = () => res(); s.onerror = () => { delete scripts[src]; rej(new Error("script non caricato: " + src)); };
+    document.head.append(s);
+  });
+}
+const LIB = { hls: "https://cdn.jsdelivr.net/npm/hls.js@1.7.3/dist/hls.min.js", ts: "https://cdn.jsdelivr.net/npm/mpegts.js@1.8.2/dist/mpegts.js", dash: "https://cdn.jsdelivr.net/npm/dashjs@5.2.1/dist/modern/umd/dash.mediaplayer.min.js" };
+const FRAMED = (() => { try { return window.self !== window.top; } catch (e) { return true; } })();
+const UA = navigator.userAgent;
+const IS_ANDROID = /Android/i.test(UA), IS_IOS = /iPhone|iPad|iPod/i.test(UA) || (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1);
+function copyText(txt) {
+  const fallback = () => { const ta = h("textarea", { style: "position:fixed;opacity:0;top:0;left:0" }); ta.value = txt; document.body.append(ta); ta.select(); let ok = false; try { ok = document.execCommand("copy"); } catch (e) {} ta.remove(); toast(ok ? "Indirizzo copiato" : "Copia non riuscita: tieni premuto per selezionare"); };
+  try { navigator.clipboard.writeText(txt).then(() => toast("Indirizzo copiato"), fallback); } catch (e) { fallback(); }
+}
+
+// ======================= archivio (IndexedDB, con riserva in memoria) =======================
+const DB = (() => {
+  const mem = { playlists: new Map(), epg: new Map() }; let dbp = null;
+  function open() {
+    if (dbp) return dbp;
+    return dbp = new Promise(res => {
+      try {
+        const r = indexedDB.open("tivu", 1);
+        r.onupgradeneeded = () => { const d = r.result; d.createObjectStore("playlists", { keyPath: "id" }); d.createObjectStore("epg", { keyPath: "id" }); };
+        r.onsuccess = () => res(r.result); r.onerror = () => res(null); r.onblocked = () => res(null);
+      } catch (e) { res(null); }
+    });
+  }
+  const p = r => new Promise((res, rej) => { r.onsuccess = () => res(r.result); r.onerror = () => rej(r.error); });
+  return {
+    async get(st, k) { const d = await open(); if (d) try { const v = await p(d.transaction(st).objectStore(st).get(k)); if (v) return v; } catch (e) {} return mem[st].get(k); },
+    async all(st) { const d = await open(); if (d) try { const v = await p(d.transaction(st).objectStore(st).getAll()); const ids = new Set(v.map(x => x.id)); for (const [k, x] of mem[st]) if (!ids.has(k)) v.push(x); return v; } catch (e) {} return [...mem[st].values()]; },
+    async put(st, v) { mem[st].set(v.id, v); const d = await open(); if (d) try { await p(d.transaction(st, "readwrite").objectStore(st).put(v)); return true; } catch (e) { console.warn("salvataggio non riuscito", e); } return false; },
+    async del(st, k) { mem[st].delete(k); const d = await open(); if (d) try { await p(d.transaction(st, "readwrite").objectStore(st).delete(k)); } catch (e) {} },
+  };
+})();
+
+// ======================= impostazioni =======================
+const DEF = { view: "grid", tile: "m", logos: true, player: "internal", resume: false, autoRefresh: true, proxy: "", proxyVideo: false, sort: "orig" };
+const CFG = Object.assign({}, DEF, store.get("settings", {}));
+function saveCfg() { store.set("settings", CFG); }
+function applyCfg() {
+  const t = { s: [42, 64], m: [52, 76], l: [68, 100] }[CFG.tile] || [52, 76];
+  document.documentElement.style.setProperty("--tile-size", t[0] + "px");
+  document.documentElement.style.setProperty("--tile-min", t[1] + "px");
+  setIcon($("btnView"), CFG.view === "grid" ? "list" : "grid");
+  $("btnView").setAttribute("aria-label", CFG.view === "grid" ? "Mostra come elenco" : "Mostra come griglia");
+}
+function proxify(url) { const p = CFG.proxy.trim(); if (!p) return url; return p.includes("{url}") ? p.replace("{url}", encodeURIComponent(url)) : p + encodeURIComponent(url); }
+const isMixed = url => location.protocol === "https:" && /^http:\/\//i.test(url);
+
+// ======================= playlist M3U =======================
+function parseAttrs(s) { const a = {}; String(s).replace(/([\w-]+)=(?:"([^"]*)"|'([^']*)'|([^\s,"']+))/g, (_, k, d, q, b) => { a[k.toLowerCase()] = (d ?? q ?? b ?? "").trim(); return ""; }); return a; }
+function parseExtinf(line) {
+  const body = line.slice(line.indexOf(":") + 1); let inQ = false, q = "", cut = -1;
+  for (let i = 0; i < body.length; i++) {
+    const c = body[i];
+    if (inQ) { if (c === q) inQ = false; }
+    else if ((c === '"' || c === "'") && body[i - 1] === "=") { inQ = true; q = c; }
+    else if (c === ",") { cut = i; break; }
+  }
+  return { attrs: parseAttrs(cut >= 0 ? body.slice(0, cut) : body), title: cut >= 0 ? body.slice(cut + 1).trim() : "" };
+}
+const ENT = { amp: "&", lt: "<", gt: ">", quot: '"', apos: "'", nbsp: " " };
+const deEnt = s => String(s || "").replace(/&(#x?[0-9a-f]+|\w+);/gi, (m, e) => e[0] === "#" ? String.fromCodePoint(parseInt(e[1] === "x" || e[1] === "X" ? e.slice(2) : e.slice(1), e[1] === "x" || e[1] === "X" ? 16 : 10) || 32) : (ENT[e.toLowerCase()] ?? m));
+function nameFromUrl(u) { try { const p = new URL(u).pathname.split("/").filter(Boolean).pop() || u; return decodeURIComponent(p).replace(/\.\w{2,4}$/, ""); } catch (e) { return u; } }
+function parseM3U(text, base) {
+  text = String(text || "").replace(/^﻿/, "");
+  const lines = text.split(/\r?\n/), out = []; let head = {}, meta = null, grp = "";
+  for (const raw of lines) {
+    const line = raw.trim(); if (!line) continue;
+    if (/^#EXTM3U/i.test(line)) { head = Object.assign(head, parseAttrs(line)); continue; }
+    if (/^#EXTINF/i.test(line)) { meta = parseExtinf(line); continue; }
+    if (/^#EXTGRP:/i.test(line)) { grp = line.slice(8).trim(); continue; }
+    if (line[0] === "#") continue;
+    let url = line; const bar = url.indexOf("|"); if (bar > 0) url = url.slice(0, bar);
+    if (base && !/^[a-z][\w+.-]*:/i.test(url)) { try { url = new URL(url, base).href; } catch (e) {} }
+    const m = meta || { attrs: {}, title: "" }, a = m.attrs;
+    const name = deEnt(m.title || a["tvg-name"] || nameFromUrl(url)).trim() || "Canale " + (out.length + 1);
+    out.push({ name, url, logo: a["tvg-logo"] || a.logo || "", group: deEnt(a["group-title"] || grp).trim(), tvgId: a["tvg-id"] || "", tvgName: a["tvg-name"] || "" });
+    meta = null; grp = "";
+  }
+  const seen = {};
+  out.forEach((c, i) => { let k = hash(c.name + "\n" + c.url); if (seen[k]) k += "-" + i; seen[k] = 1; c.key = k; c.i = i; c.n = norm(c.name); });
+  const epg = head["url-tvg"] || head["x-tvg-url"] || head["tvg-url"] || "";
+  return { channels: out, epg };
+}
+
+// ======================= stato =======================
+const S = { pls: [], pl: null, chans: [], groups: [], tab: "all", q: "", list: [], shown: 0, favs: new Set(), recs: [], epg: {}, loading: 0 };
+const TAB_FAV = "fav", TAB_REC = "rec", TAB_ALL = "all";
+function loadPrefsFor(pl) { S.favs = new Set(store.get("favs." + pl.id, [])); S.recs = store.get("rec." + pl.id, []); S.tab = store.get("tab." + pl.id, TAB_ALL); }
+function saveFavs() { store.set("favs." + S.pl.id, [...S.favs]); }
+function isFav(ch) { return S.favs.has(ch.key); }
+function toggleFav(ch) {
+  if (S.favs.has(ch.key)) { S.favs.delete(ch.key); toast("Tolto dai preferiti"); } else { S.favs.add(ch.key); toast("Aggiunto ai preferiti"); }
+  saveFavs(); refreshTileFav(ch); if (S.tab === TAB_FAV && !S.q) render(true); updateTabCounts(); if (P.ch === ch) updatePlayerInfo();
+}
+function addRecent(ch) { S.recs = [ch.key, ...S.recs.filter(k => k !== ch.key)].slice(0, 40); store.set("rec." + S.pl.id, S.recs); store.set("last", { pl: S.pl.id, key: ch.key }); updateTabCounts(); }
+const byKey = () => { if (!S._bk || S._bkFor !== S.chans) { S._bk = new Map(S.chans.map(c => [c.key, c])); S._bkFor = S.chans; } return S._bk; };
+
+// ======================= schede e canali =======================
+function tabsList() {
+  const t = [{ id: TAB_FAV, label: "Preferiti" }, { id: TAB_REC, label: "Recenti" }, { id: TAB_ALL, label: "Tutti i canali" }];
+  for (const g of S.groups) t.push({ id: "g:" + g, label: g });
+  return t;
+}
+function renderTabs() {
+  const nav = $("tabs"); nav.replaceChildren();
+  for (const t of tabsList()) {
+    const b = h("button", { class: "tab", type: "button", role: "tab", "aria-selected": String(t.id === S.tab), "data-tab": t.id, onclick: () => setTab(t.id) }, t.label);
+    nav.append(b);
+  }
+  updateTabCounts(); scrollTabIntoView();
+}
+function updateTabCounts() {
+  for (const b of $("tabs").children) {
+    const id = b.dataset.tab; let n = null;
+    if (id === TAB_FAV) n = S.favs.size ? [...S.favs].filter(k => byKey().has(k)).length : 0;
+    let sp = b.querySelector(".n");
+    if (n) { if (!sp) { sp = h("span", { class: "n" }); b.append(sp); } sp.textContent = n; } else if (sp) sp.remove();
+  }
+}
+function scrollTabIntoView() {
+  const nav = $("tabs"), b = nav.querySelector('[aria-selected="true"]'); if (!b) return;
+  nav.scrollTo({ left: b.offsetLeft - (nav.clientWidth - b.offsetWidth) / 2, behavior: "smooth" });
+}
+function setTab(id) {
+  if (!tabsList().some(t => t.id === id)) id = TAB_ALL;
+  S.tab = id; if (S.pl) store.set("tab." + S.pl.id, id);
+  for (const b of $("tabs").children) b.setAttribute("aria-selected", String(b.dataset.tab === id));
+  scrollTabIntoView(); render(true);
+}
+function currentList() {
+  let L;
+  if (S.q) { const q = norm(S.q).trim(); L = S.chans.filter(c => c.n.includes(q) || norm(c.group).includes(q)); }
+  else if (S.tab === TAB_FAV) L = S.chans.filter(c => S.favs.has(c.key));
+  else if (S.tab === TAB_REC) { const m = byKey(); return S.recs.map(k => m.get(k)).filter(Boolean); }
+  else if (S.tab === TAB_ALL) L = S.chans;
+  else { const g = S.tab.slice(2); L = S.chans.filter(c => c.group === g); }
+  if (CFG.sort === "az") L = L.slice().sort((a, b) => a.name.localeCompare(b.name, "it", { numeric: true, sensitivity: "base" }));
+  return L;
+}
+const COLORS = ["#5c6bc0", "#8d6e63", "#fb8c00", "#f4511e", "#7cb342", "#43a047", "#00897b", "#e53935", "#d81b60", "#8e24aa", "#5e35b1", "#1e88e5", "#039be5", "#00acc1", "#9e9d24", "#ef6c00", "#546e7a"];
+function avatar(ch) {
+  const letter = (ch.name.match(/[\p{L}\p{N}]/u) || ["?"])[0].toUpperCase();
+  const c = COLORS[parseInt(hash(ch.name), 36) % COLORS.length];
+  // l'iniziale colorata resta visibile finche' il logo non e' arrivato (o se non arriva mai)
+  const av = h("span", { class: "av" }, h("b", { style: "--c:" + c, text: letter }));
+  if (CFG.logos && ch.logo && /^(https?:|data:)/i.test(ch.logo)) {
+    const img = h("img", { alt: "", loading: "lazy", decoding: "async", referrerpolicy: "no-referrer" });
+    img.onload = () => { if (img.naturalWidth > 1) av.classList.add("has-logo"); else img.remove(); };
+    img.onerror = () => img.remove(); img.src = ch.logo; av.append(img);
+  }
+  return av;
+}
+function epgLine(ch) {
+  const x = nowNext(ch); if (!x || !x.now) return null;
+  return { text: x.now.t + " · " + hm(x.now.s) + "–" + hm(x.now.e), pct: x.pct };
+}
+function tile(ch) {
+  const grid = CFG.view === "grid";
+  const b = h("button", { class: "ch", type: "button", "data-k": ch.key, title: grid ? ch.name : null });
+  b.append(avatar(ch));
+  if (grid) { b.append(h("span", { class: "nm", text: ch.name })); if (isFav(ch)) b.append(h("span", { class: "favdot" }, icon("star"))); }
+  else {
+    const tx = h("span", { class: "tx" }, h("span", { class: "nm", text: ch.name }));
+    const e = epgLine(ch);
+    if (e) { tx.append(h("span", { class: "sub ep", text: e.text }), h("span", { class: "pb" }, h("i", { style: "width:" + Math.round(e.pct * 100) + "%" }))); }
+    else if (ch.group && (S.tab === TAB_ALL || S.tab === TAB_FAV || S.tab === TAB_REC || S.q)) tx.append(h("span", { class: "sub", text: ch.group }));
+    b.append(tx); if (isFav(ch)) b.append(h("span", { class: "favdot" }, icon("star")));
+  }
+  return b;
+}
+function refreshTileFav(ch) {
+  const b = $("list").querySelector('[data-k="' + ch.key + '"]'); if (!b) return;
+  b.replaceWith(tile(ch));
+}
+const CHUNK = 150;
+function render(reset) {
+  const list = $("list");
+  if (reset) {
+    S.list = currentList(); S.shown = 0; list.replaceChildren(); $("main").scrollTop = 0;
+    list.className = CFG.view === "grid" ? "grid" : "rows";
+    $("resHead").hidden = !S.q; if (S.q) $("resHead").textContent = S.list.length ? S.list.length + (S.list.length === 1 ? " canale trovato" : " canali trovati") + " per «" + S.q + "»" : "";
+  }
+  renderMore(); renderEmpty();
+}
+function renderMore() {
+  if (S.shown >= S.list.length) return;
+  const frag = document.createDocumentFragment(), end = Math.min(S.list.length, S.shown + CHUNK);
+  for (let i = S.shown; i < end; i++) frag.append(tile(S.list[i]));
+  S.shown = end; $("list").append(frag);
+}
+function renderEmpty() {
+  const e = $("empty"); if (S.list.length || S.loading) { e.hidden = true; return; }
+  e.hidden = false; e.replaceChildren();
+  let ic = "tv", t = "Nessun canale", p = "";
+  if (!S.pl) { ic = "playlist"; t = "Nessuna playlist"; p = "Aggiungi una playlist M3U dal menu per vedere i canali."; }
+  else if (S.q) { ic = "search"; t = "Nessun risultato"; p = "Nessun canale contiene «" + S.q + "». Prova con un'altra parola."; }
+  else if (S.tab === TAB_FAV) { ic = "starO"; t = "Ancora nessun preferito"; p = "Tieni premuto un canale (o fai clic con il tasto destro) e scegli «Aggiungi ai preferiti». Puoi farlo anche dal lettore con la stella."; }
+  else if (S.tab === TAB_REC) { ic = "history"; t = "Nessun canale visto di recente"; p = "I canali che apri compaiono qui, dal più recente."; }
+  else if (!S.chans.length) { ic = "playlist"; t = "La playlist è vuota"; p = "Non contiene canali. Controlla l'indirizzo o il file e aggiornala."; }
+  e.append(icon(ic), h("h3", { text: t }), h("p", { text: p }));
+  if (!S.pl || !S.chans.length) e.append(h("button", { class: "btn primary", type: "button", onclick: () => playlistDialog() }, "Aggiungi playlist"));
+}
+// i canali si aggiungono man mano che si scorre (le playlist possono avere decine di migliaia di voci)
+new IntersectionObserver(es => { if (es.some(x => x.isIntersecting)) renderMore(); }, { root: $("main"), rootMargin: "900px" }).observe($("sentinel"));
+
+// tocco, pressione lunga, clic destro sui canali
+(() => {
+  const list = $("list"); let lpT = 0, lpFired = false, sx = 0, sy = 0, lastSheet = 0;
+  const chOf = el => { const b = el.closest(".ch"); return b ? byKey().get(b.dataset.k) : null; };
+  const openSheet = ch => { if (Date.now() - lastSheet < 700) return; lastSheet = Date.now(); channelSheet(ch); };
+  list.addEventListener("click", e => { if (lpFired) { lpFired = false; e.preventDefault(); return; } const ch = chOf(e.target); if (ch) openChannel(ch); });
+  list.addEventListener("contextmenu", e => { const ch = chOf(e.target); if (!ch) return; e.preventDefault(); clearTimeout(lpT); openSheet(ch); });
+  list.addEventListener("touchstart", e => {
+    const ch = chOf(e.target); if (!ch) return; lpFired = false; sx = e.touches[0].clientX; sy = e.touches[0].clientY;
+    clearTimeout(lpT); lpT = setTimeout(() => { lpFired = true; openSheet(ch); }, 520);
+  }, { passive: true });
+  list.addEventListener("touchmove", e => { if (Math.abs(e.touches[0].clientX - sx) > 10 || Math.abs(e.touches[0].clientY - sy) > 10) clearTimeout(lpT); }, { passive: true });
+  list.addEventListener("touchend", () => clearTimeout(lpT));
+  list.addEventListener("touchcancel", () => clearTimeout(lpT));
+  // scorrere a destra/sinistra cambia scheda, come nell'app
+  const main = $("main"); let tx0 = 0, ty0 = 0, tt0 = 0;
+  main.addEventListener("touchstart", e => { tx0 = e.touches[0].clientX; ty0 = e.touches[0].clientY; tt0 = Date.now(); }, { passive: true });
+  main.addEventListener("touchend", e => {
+    if (S.q || lpFired) return; const t = e.changedTouches[0], dx = t.clientX - tx0, dy = t.clientY - ty0;
+    if (Math.abs(dx) > 80 && Math.abs(dy) < 45 && Date.now() - tt0 < 600) {
+      const ids = tabsList().map(x => x.id), i = ids.indexOf(S.tab), j = i + (dx < 0 ? 1 : -1);
+      if (j >= 0 && j < ids.length) setTab(ids[j]);
+    }
+  }, { passive: true });
+})();
+
+// ======================= strati (menu, fogli, finestre) e tasto Indietro =======================
+// Una sola voce nella cronologia finche' c'e' almeno uno strato aperto: il tasto Indietro del telefono chiude lo strato
+// in cima. Chiudere uno strato e aprirne subito un altro (menu -> finestra) riusa la stessa voce: con un "indietro" e un
+// "avanti" ravvicinati il browser poteva tornare una pagina di troppo e uscire dall'app.
+const layers = []; let skipPop = 0, armed = false, backT = 0;
+function arm() { if (FRAMED || armed) return; try { history.pushState({ tivu: 1 }, ""); armed = true; } catch (e) {} }
+function pushLayer(closeFn) {
+  const L = { closeFn, open: true }; layers.push(L);
+  clearTimeout(backT); backT = 0; arm();
+  return L;
+}
+function closeLayer(L) {
+  if (!L || !L.open) return; L.open = false; const i = layers.indexOf(L); if (i >= 0) layers.splice(i, 1);
+  L.closeFn();
+  if (armed && !layers.length) { clearTimeout(backT); backT = setTimeout(() => { backT = 0; if (armed && !layers.length) { armed = false; skipPop++; history.back(); } }, 60); }
+}
+addEventListener("popstate", () => {
+  if (skipPop > 0) { skipPop--; return; }
+  armed = false; const L = layers.pop(); if (L && L.open) { L.open = false; L.closeFn(); }
+  if (layers.length) arm();
+});
+function topLayer() { return layers[layers.length - 1]; }
+
+function dialog({ title, body, actions, wide, onClose }) {
+  const box = h("div", { class: "dlg" + (wide ? " wide" : ""), role: "dialog", "aria-modal": "true", "aria-label": title });
+  const wrap = h("div", { class: "dlg-wrap" }, box);
+  const acts = h("div", { class: "dlg-a" });
+  for (const a of actions || []) {
+    const b = h("button", { class: "btn " + (a.primary ? "primary" : "text"), type: "button" }, a.label);
+    b.addEventListener("click", async () => {
+      if (a.run) { b.disabled = true; let r; try { r = await a.run(b); } finally { b.disabled = false; } if (r === false) return; }
+      close();
+    });
+    acts.append(b);
+  }
+  box.append(h("h2", { class: "dlg-t", text: title }), h("div", { class: "dlg-b" }, body), acts);
+  wrap.addEventListener("click", e => { if (e.target === wrap) close(); });
+  document.body.append(wrap);
+  const L = pushLayer(() => { wrap.remove(); onClose && onClose(); });
+  function close() { closeLayer(L); }
+  setTimeout(() => { const f = box.querySelector("input:not([type=checkbox]):not([type=file]), textarea"); if (f && !IS_IOS && !IS_ANDROID) f.focus(); }, 30);
+  return { close, box };
+}
+function sheet(head, items) {
+  const scrim = h("div", { class: "scrim" }), sh = h("div", { class: "sheet", role: "dialog", "aria-modal": "true" });
+  if (head) sh.append(head);
+  for (const it of items) {
+    if (it.node) { sh.append(it.node); continue; }
+    sh.append(h("button", { class: "menu-btn" + (it.danger ? " danger" : ""), type: "button", onclick: () => { closeLayer(L); it.run(); } }, icon(it.icon), h("span", { text: it.label })));
+  }
+  document.body.append(scrim, sh);
+  const L = pushLayer(() => { scrim.remove(); sh.remove(); });
+  scrim.addEventListener("click", () => closeLayer(L));
+  return L;
+}
+function popMenu(items) {
+  const scrim = h("div", { class: "scrim", style: "background:transparent;animation:none" }), m = h("div", { class: "menu", role: "menu" });
+  for (const it of items) {
+    if (it.sep) { m.append(h("div", { class: "menu-sep" })); continue; }
+    if (it.label && !it.run) { m.append(h("div", { class: "menu-label", text: it.label })); continue; }
+    m.append(h("button", { type: "button", role: "menuitem", onclick: () => { closeLayer(L); it.run(); } }, it.icon ? icon(it.icon) : h("span", { style: "width:24px" }), h("span", { text: it.label }), it.checked ? h("span", { class: "chk" }, icon("check")) : null));
+  }
+  document.body.append(scrim, m);
+  const L = pushLayer(() => { scrim.remove(); m.remove(); });
+  scrim.addEventListener("click", () => closeLayer(L));
+}
+
+// ======================= menu laterale =======================
+function openDrawer() {
+  const scrim = h("div", { class: "scrim" }), dr = h("aside", { class: "drawer", "aria-label": "Menu" });
+  const head = h("div", { class: "dr-head", html: LOGO_SVG }); head.append(h("div", {}, h("b", { text: "Tivù Player" }), h("small", { text: "Le tue playlist IPTV" })));
+  const body = h("div", { class: "dr-body" }, h("div", { class: "dr-label", text: "Playlist" }));
+  const go = fn => () => { closeLayer(L); fn(); };
+  for (const pl of S.pls) {
+    const n = pl.count != null ? pl.count + (pl.count === 1 ? " canale" : " canali") : "";
+    const src = { url: "da link", file: "da file", text: "incollata", xtream: "Xtream Codes", demo: "esempio" }[pl.src] || "";
+    const row = h("div", { style: "display:flex;align-items:center" },
+      h("button", { class: "dr-item" + (S.pl && S.pl.id === pl.id ? " on" : ""), type: "button", style: "flex:1;min-width:0", onclick: go(() => selectPlaylist(pl)) }, icon("playlist"), h("span", { class: "tx" }, h("b", { text: pl.name }), h("small", { text: [n, src].filter(Boolean).join(" · ") }))),
+      h("button", { class: "ib", type: "button", style: "color:var(--muted);margin-right:4px", "aria-label": "Opzioni di " + pl.name, onclick: go(() => playlistSheet(pl)) }, icon("more")));
+    body.append(row);
+  }
+  body.append(h("button", { class: "dr-item", type: "button", onclick: go(() => playlistDialog()) }, icon("add"), h("span", { class: "tx" }, h("b", { text: "Aggiungi playlist" }))));
+  body.append(h("div", { class: "dr-sep" }));
+  body.append(h("button", { class: "dr-item", type: "button", onclick: go(settingsDialog) }, icon("settings"), h("span", { class: "tx" }, h("b", { text: "Impostazioni" }))));
+  body.append(h("button", { class: "dr-item", type: "button", onclick: go(helpDialog) }, icon("info"), h("span", { class: "tx" }, h("b", { text: "Guida e formati" }))));
+  dr.append(head, body); document.body.append(scrim, dr);
+  const L = pushLayer(() => { scrim.remove(); dr.remove(); });
+  scrim.addEventListener("click", () => closeLayer(L));
+}
+
+// ======================= rete: playlist e guida TV =======================
+function friendlyFetchError(url, e) {
+  if (e && e.status) return "Il server ha risposto con l'errore " + e.status + (e.status === 401 || e.status === 403 ? ": credenziali non valide o accesso negato." : e.status === 404 ? ": indirizzo non trovato." : ".");
+  if (isMixed(url) && !CFG.proxy) return "L'indirizzo usa http e questa pagina è https: il browser lo blocca. Scarica il file e caricalo con «File», oppure imposta un proxy nelle impostazioni.";
+  return "Non riesco a leggere l'indirizzo. Il server potrebbe non permettere la lettura da un sito web (CORS) o non essere raggiungibile. Prova a scaricare il file e a caricarlo con «File», oppure imposta un proxy nelle impostazioni.";
+}
+async function fetchSmart(url, opt) {
+  const cands = [];
+  if (isMixed(url)) cands.push(url.replace(/^http:/i, "https:")); else cands.push(url);
+  if (CFG.proxy.trim()) cands.push(proxify(url));
+  let last;
+  for (const u of cands) {
+    try {
+      const r = await fetch(u, Object.assign({ cache: "no-store", redirect: "follow" }, opt || {}));
+      if (r.ok) return r;
+      last = Object.assign(new Error("HTTP " + r.status), { status: r.status });
+    } catch (e) { last = e; }
+  }
+  throw last || new Error("rete");
+}
+async function fetchText(url) { const r = await fetchSmart(url); return await r.text(); }
+
+// guida TV (XMLTV, anche .gz): si leggono a pezzi solo i programmi dei canali della playlist, dalle 3 ore scorse alle prossime 36
+function xmltvTime(s) {
+  const m = /^(\d{4})(\d\d)(\d\d)(\d\d)(\d\d)(\d\d)?\s*([+-]\d{4})?/.exec(String(s || "").trim()); if (!m) return NaN;
+  let t = Date.UTC(+m[1], +m[2] - 1, +m[3], +m[4], +m[5], +(m[6] || 0));
+  if (m[7]) { const sg = m[7][0] === "-" ? -1 : 1, oh = +m[7].slice(1, 3), om = +m[7].slice(3, 5); t -= sg * (oh * 60 + om) * 60000; }
+  return t;
+}
+async function* textChunks(resp) {
+  const raw = resp.body.getReader(); const first = await raw.read();
+  const gz = first.value && first.value[0] === 0x1f && first.value[1] === 0x8b;
+  let stream = new ReadableStream({
+    start(c) { if (first.value) c.enqueue(first.value); if (first.done) c.close(); },
+    async pull(c) { const r = await raw.read(); if (r.done) c.close(); else c.enqueue(r.value); },
+    cancel() { raw.cancel(); },
+  });
+  if (gz) { if (typeof DecompressionStream === "undefined") throw new Error("Questo browser non sa aprire le guide compresse (.gz)."); stream = stream.pipeThrough(new DecompressionStream("gzip")); }
+  const rd = stream.pipeThrough(new TextDecoderStream()).getReader();
+  for (;;) { const r = await rd.read(); if (r.done) break; yield r.value; }
+}
+async function fetchEpg(urls, chans, onProgress) {
+  const byId = new Map(), byName = new Map();
+  for (const c of chans) {
+    if (c.tvgId) { const k = c.tvgId.toLowerCase(); (byId.get(k) || byId.set(k, []).get(k)).push(c.key); }
+    for (const nm of [c.tvgName, c.name]) { const k = normName(nm); if (k) (byName.get(k) || byName.set(k, []).get(k)).push(c.key); }
+  }
+  const idMap = new Map(), out = {}, now = Date.now(), from = now - 3 * 3600e3, to = now + 36 * 3600e3; let nProg = 0;
+  const tagText = (blk, tag) => { const m = new RegExp("<" + tag + "\\b[^>]*>([\\s\\S]*?)</" + tag + ">").exec(blk); return m ? deEnt(m[1].replace(/<!\[CDATA\[|\]\]>/g, "")).trim() : ""; };
+  const attr = (blk, a) => { const m = new RegExp("\\b" + a + '="([^"]*)"').exec(blk.slice(0, blk.indexOf(">") + 1)); return m ? deEnt(m[1]) : ""; };
+  function handle(tag, blk) {
+    if (tag === "channel") {
+      const id = attr(blk, "id"); if (!id) return; const keys = new Set(byId.get(id.toLowerCase()) || []);
+      blk.replace(/<display-name\b[^>]*>([\s\S]*?)<\/display-name>/g, (_, n) => { for (const k of byName.get(normName(deEnt(n))) || []) keys.add(k); return ""; });
+      if (keys.size) idMap.set(id, [...keys]);
+      return;
+    }
+    const ch = attr(blk, "channel"); const keys = idMap.get(ch) || byId.get(ch.toLowerCase()); if (!keys) return;
+    const s = xmltvTime(attr(blk, "start")), e = xmltvTime(attr(blk, "stop")) || s + 3600e3;
+    if (!(e > from && s < to)) return;
+    const p = { s, e, t: tagText(blk, "title") || "Senza titolo", d: tagText(blk, "desc").slice(0, 280) };
+    for (const k of keys) (out[k] || (out[k] = [])).push(p);
+    nProg++;
+  }
+  for (const url of urls) {
+    const resp = await fetchSmart(url); let buf = "", total = 0;
+    for await (const chunk of textChunks(resp)) {
+      buf += chunk; total += chunk.length; let pos = 0;
+      for (;;) {
+        const a = buf.indexOf("<programme", pos), b = buf.indexOf("<channel", pos);
+        if (a < 0 && b < 0) { pos = Math.max(pos, buf.length - 16); break; }
+        const st = b < 0 || (a >= 0 && a < b) ? a : b, tag = st === a ? "programme" : "channel";
+        const gt = buf.indexOf(">", st); if (gt < 0) { pos = st; break; }
+        let end;
+        if (buf[gt - 1] === "/") end = gt + 1;
+        else { const e = buf.indexOf("</" + tag + ">", gt); if (e < 0) { pos = st; break; } end = e + tag.length + 3; }
+        handle(tag, buf.slice(st, end)); pos = end;
+      }
+      buf = buf.slice(pos);
+      if (onProgress) onProgress(total, nProg);
+    }
+  }
+  for (const k in out) { out[k].sort((x, y) => x.s - y.s); const seen = new Set(); out[k] = out[k].filter(p => !seen.has(p.s) && seen.add(p.s)).slice(0, 80); }
+  return out;
+}
+function nowNext(ch) {
+  const L = S.epg[ch.key]; if (!L || !L.length) return null; const t = Date.now();
+  const i = L.findIndex(p => p.s <= t && p.e > t);
+  if (i < 0) { const nx = L.find(p => p.s > t); return nx ? { now: null, next: nx, pct: 0 } : null; }
+  const n = L[i]; return { now: n, next: L[i + 1] || null, pct: Math.min(1, (t - n.s) / (n.e - n.s)) };
+}
+function epgUrls(pl) { return String(pl.epgUrl || pl.epgAuto || "").split(",").map(s => s.trim()).filter(s => /^https?:\/\//i.test(s)); }
+async function loadEpg(pl, force) {
+  const urls = epgUrls(pl); if (!urls.length) { S.epg = {}; return; }
+  const cache = await DB.get("epg", pl.id);
+  if (cache && cache.url === urls.join(",")) { S.epg = cache.data || {}; if (S.pl === pl) render(true); if (!force && Date.now() - cache.at < 8 * 3600e3) return; }
+  if (S.pl !== pl) return;
+  setStatus("Guida TV: caricamento…"); busy(1);
+  try {
+    const data = await fetchEpg(urls, S.chans, (n, p) => setStatus("Guida TV: " + Math.round(n / 1048576) + " MB letti, " + p + " programmi trovati…"));
+    await DB.put("epg", { id: pl.id, url: urls.join(","), at: Date.now(), data });
+    if (S.pl === pl) { S.epg = data; render(true); }
+    const n = Object.keys(data).length; setStatus(n ? "" : "Guida TV caricata, ma nessun canale corrisponde (controlla i tvg-id).", n ? 0 : 7000);
+    if (n && force) toast("Guida TV aggiornata: " + n + (n === 1 ? " canale" : " canali"));
+  } catch (e) {
+    setStatus("Guida TV non caricata. " + (e.message && /gz/.test(e.message) ? e.message : friendlyFetchError(urls[0], e)), 9000);
+  } finally { busy(-1); }
+}
+setInterval(() => {   // l'ora avanza: si aggiornano le righe «in onda»
+  if (!Object.keys(S.epg).length) return;
+  if (CFG.view === "rows") for (const b of $("list").children) { const ch = byKey().get(b.dataset.k); if (ch) { const e = epgLine(ch), sub = b.querySelector(".ep"), bar = b.querySelector(".pb i"); if (e && sub) { sub.textContent = e.text; if (bar) bar.style.width = Math.round(e.pct * 100) + "%"; } } }
+  if (!$("player").hidden) updatePlayerInfo();
+}, 30000);
+
+let statusT = 0;
+function setStatus(msg, ms, btn) {
+  const st = $("status"); clearTimeout(statusT);
+  if (!msg) { st.hidden = true; return; }
+  $("statusText").textContent = msg; st.hidden = false;
+  const b = $("statusBtn"); b.hidden = false; b.textContent = btn ? btn.label : "Chiudi"; b.onclick = () => { st.hidden = true; if (btn) btn.run(); };
+  if (ms) statusT = setTimeout(() => { st.hidden = true; }, ms);
+}
+function busy(d) { S.loading = Math.max(0, S.loading + d); $("loadbar").hidden = !S.loading; }
+
+// ======================= gestione playlist =======================
+const DEMO_M3U = `#EXTM3U
+#EXTINF:-1 group-title="Dirette di prova",Akamai Live
+https://cph-p2p-msl.akamaized.net/hls/live/2000341/test/master.m3u8
+#EXTINF:-1 group-title="Dirette di prova",Bipbop 4:3
+https://devstreaming-cdn.apple.com/videos/streaming/examples/bipbop_4x3/bipbop_4x3_variant.m3u8
+#EXTINF:-1 group-title="Dirette di prova",Bipbop 16:9
+https://devstreaming-cdn.apple.com/videos/streaming/examples/bipbop_16x9/bipbop_16x9_variant.m3u8
+#EXTINF:-1 group-title="Dirette di prova",Bipbop fMP4
+https://devstreaming-cdn.apple.com/videos/streaming/examples/img_bipbop_adv_example_fmp4/master.m3u8
+#EXTINF:-1 group-title="Film liberi",Big Buck Bunny
+https://test-streams.mux.dev/x36xhzz/x36xhzz.m3u8
+#EXTINF:-1 group-title="Film liberi",Tears of Steel
+https://demo.unified-streaming.com/k8s/features/stable/video/tears-of-steel/tears-of-steel.ism/.m3u8
+#EXTINF:-1 group-title="Film liberi",Sintel
+https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/Sintel.mp4
+#EXTINF:-1 group-title="Film liberi",Elephants Dream
+https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ElephantsDream.mp4
+#EXTINF:-1 group-title="Corti",For Bigger Blazes
+https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerBlazes.mp4
+#EXTINF:-1 group-title="Corti",For Bigger Escapes
+https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerEscapes.mp4
+#EXTINF:-1 group-title="Corti",For Bigger Fun
+https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerFun.mp4
+#EXTINF:-1 group-title="Corti",For Bigger Joyrides
+https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerJoyrides.mp4
+#EXTINF:-1 group-title="Corti",For Bigger Meltdowns
+https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerMeltdowns.mp4
+#EXTINF:-1 group-title="Motori",Subaru Outback
+https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/SubaruOutbackOnStreetAndDirt.mp4
+#EXTINF:-1 group-title="Motori",Volkswagen GTI
+https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/VolkswagenGTIReview.mp4
+#EXTINF:-1 group-title="Motori",Bullrun
+https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/WeAreGoingOnBullrun.mp4
+#EXTINF:-1 group-title="Motori",Un'auto con mille dollari
+https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/WhatCarCanYouGetForAGrand.mp4
+`;
+const SUGGEST = [
+  { name: "Italia", url: "https://iptv-org.github.io/iptv/countries/it.m3u" },
+  { name: "Notizie", url: "https://iptv-org.github.io/iptv/categories/news.m3u" },
+  { name: "Musica", url: "https://iptv-org.github.io/iptv/categories/music.m3u" },
+  { name: "Sport", url: "https://iptv-org.github.io/iptv/categories/sports.m3u" },
+  { name: "Film", url: "https://iptv-org.github.io/iptv/categories/movies.m3u" },
+  { name: "Bambini", url: "https://iptv-org.github.io/iptv/categories/kids.m3u" },
+];
+function demoPlaylist() { return { id: "demo", name: "esempio.m3u", src: "demo", text: DEMO_M3U, created: Date.now(), updated: Date.now() }; }
+async function refreshPlaylistsList() { S.pls = (await DB.all("playlists")).sort((a, b) => (a.created || 0) - (b.created || 0)); }
+async function selectPlaylist(pl, opt) {
+  opt = opt || {};
+  S.pl = pl; store.set("cur", pl.id); loadPrefsFor(pl); S.epg = {};
+  $("title").textContent = pl.name;
+  applyParsed(pl, parseM3U(pl.text || "", pl.url));
+  renderTabs(); render(true);
+  if (opt.boot && CFG.resume) resumeLast();
+  if (pl.url && CFG.autoRefresh && !opt.fresh && Date.now() - (pl.updated || 0) > 24 * 3600e3) refreshPlaylist(pl, true);
+  else loadEpg(pl);
+}
+function applyParsed(pl, parsed) {
+  S.chans = parsed.channels; S._bk = null;
+  const gs = []; const seen = new Set(); for (const c of S.chans) if (c.group && !seen.has(c.group)) { seen.add(c.group); gs.push(c.group); }
+  S.groups = gs; pl.epgAuto = parsed.epg; pl.count = S.chans.length;
+}
+async function refreshPlaylist(pl, quiet) {
+  if (!pl.url) { if (!quiet) toast("Questa playlist non ha un indirizzo da aggiornare"); return; }
+  busy(1); if (!quiet) setStatus("Aggiornamento di «" + pl.name + "»…");
+  try {
+    const text = await fetchText(pl.url); const parsed = parseM3U(text, pl.url);
+    if (!parsed.channels.length) throw Object.assign(new Error("vuota"), { empty: true });
+    pl.text = text; pl.updated = Date.now(); pl.epgAuto = parsed.epg; pl.count = parsed.channels.length;
+    await DB.put("playlists", pl);
+    if (S.pl && S.pl.id === pl.id) { const tab = S.tab; applyParsed(pl, parsed); S.tab = tab; renderTabs(); render(true); }
+    setStatus(""); if (!quiet) toast("Playlist aggiornata: " + parsed.channels.length + " canali");
+  } catch (e) {
+    setStatus(e.empty ? "L'indirizzo non contiene canali M3U." : "Aggiornamento non riuscito. " + friendlyFetchError(pl.url, e), 10000);
+  } finally { busy(-1); if (S.pl && S.pl.id === pl.id) loadEpg(pl); }
+}
+function playlistSheet(pl) {
+  const head = h("div", { class: "sh-head" }, icon("playlist"), h("div", { class: "tx" }, h("b", { text: pl.name }), h("small", { text: pl.url || (pl.src === "demo" ? "Playlist di esempio inclusa" : "Caricata dal telefono") })));
+  const items = [{ icon: "tv", label: "Apri", run: () => selectPlaylist(pl) }];
+  if (pl.url) items.push({ icon: "refresh", label: "Aggiorna ora", run: () => refreshPlaylist(pl) });
+  items.push({ icon: "edit", label: "Modifica", run: () => playlistDialog(pl) });
+  if (pl.url) items.push({ icon: "copy", label: "Copia indirizzo", run: () => copyText(pl.url) });
+  items.push({ icon: "del", label: "Elimina", danger: true, run: () => confirmDelete(pl) });
+  sheet(head, items);
+}
+function confirmDelete(pl) {
+  dialog({ title: "Eliminare «" + pl.name + "»?", body: h("p", { text: "Spariscono anche i preferiti e i recenti di questa playlist. Il file o l'indirizzo originale non vengono toccati." }), actions: [
+    { label: "Annulla" },
+    { label: "Elimina", primary: true, run: async () => {
+      await DB.del("playlists", pl.id); await DB.del("epg", pl.id); for (const k of ["favs.", "rec.", "tab."]) store.del(k + pl.id);
+      await refreshPlaylistsList();
+      if (S.pl && S.pl.id === pl.id) { if (S.pls.length) selectPlaylist(S.pls[0]); else { S.pl = null; S.chans = []; S.groups = []; $("title").textContent = "Tivù"; renderTabs(); render(true); } }
+      toast("Playlist eliminata");
+    } },
+  ] });
+}
+function field(label, input, hint) { return h("div", { class: "fld" }, h("label", { for: input.id, text: label }), input, hint ? h("div", { class: "hint", text: hint }) : null); }
+function playlistDialog(edit) {
+  let mode = edit ? (edit.src === "xtream" ? "xtream" : edit.url ? "url" : "text") : "url";
+  const seg = h("div", { class: "seg", role: "group", "aria-label": "Tipo di playlist" });
+  const modes = [["url", "Link"], ["file", "File"], ["text", "Testo"], ["xtream", "Xtream"]];
+  const name = h("input", { id: "plName", type: "text", placeholder: "Es. Canali di casa", value: edit ? edit.name : "" });
+  const url = h("input", { id: "plUrl", type: "url", inputmode: "url", placeholder: "https://…/playlist.m3u", value: edit && edit.src !== "xtream" ? edit.url || "" : "" });
+  const epg = h("input", { id: "plEpg", type: "url", inputmode: "url", placeholder: "Facoltativo: https://…/guide.xml.gz", value: edit ? edit.epgUrl || "" : "" });
+  const file = h("input", { id: "plFile", type: "file", accept: ".m3u,.m3u8,.txt,audio/x-mpegurl,application/x-mpegurl,text/plain" });
+  const txt = h("textarea", { id: "plText", placeholder: "#EXTM3U\n#EXTINF:-1 group-title=\"Notizie\",Nome canale\nhttps://…/stream.m3u8", spellcheck: "false" });
+  if (edit && !edit.url && edit.text && edit.src !== "demo") txt.value = edit.text.length < 400000 ? edit.text : "";
+  const xs = h("input", { id: "xtServer", type: "url", inputmode: "url", placeholder: "http://server:porta" }), xu = h("input", { id: "xtUser", type: "text", autocomplete: "username" }), xp = h("input", { id: "xtPass", type: "password", autocomplete: "current-password" });
+  if (edit && edit.src === "xtream" && edit.xt) { xs.value = edit.xt.s; xu.value = edit.xt.u; xp.value = edit.xt.p; }
+  const chips = h("div", { class: "chips" }, SUGGEST.map(s => h("button", { class: "chip", type: "button", onclick: () => { url.value = s.url; if (!name.value) name.value = "iptv-org · " + s.name; } }, s.name)));
+  const panes = {
+    url: h("div", { class: "fld", style: "gap:14px" }, field("Indirizzo della playlist", url, "Link M3U o M3U8. Si aggiorna da solo ogni 24 ore."), h("div", { class: "fld" }, h("label", { text: "Canali pubblici gratuiti (iptv-org)" }), chips)),
+    file: field("File dal dispositivo", file, "Un file .m3u o .m3u8 salvato sul telefono o sul computer."),
+    text: field("Contenuto della playlist", txt, "Incolla qui il testo M3U."),
+    xtream: h("div", { class: "fld", style: "gap:14px" }, field("Server", xs, "L'indirizzo che ti ha dato il fornitore, con la porta."), field("Nome utente", xu), field("Password", xp)),
+  };
+  const err = h("div", { class: "err", role: "alert" }); err.hidden = true;
+  const paneBox = h("div", { style: "display:flex;flex-direction:column;gap:14px" });
+  const epgF = field("Guida TV (XMLTV)", epg, "Facoltativa. Se la playlist ne indica una, viene usata quella.");
+  function show(m) {
+    mode = m; for (const b of seg.children) b.setAttribute("aria-pressed", String(b.dataset.m === m));
+    paneBox.replaceChildren(panes[m]); err.hidden = true; epgF.hidden = m === "xtream";
+  }
+  for (const [m, l] of modes) seg.append(h("button", { type: "button", "data-m": m, onclick: () => show(m) }, l));
+  const body = h("div", { style: "display:flex;flex-direction:column;gap:14px" }, edit && edit.src === "demo" ? null : seg, field("Nome", name), paneBox, epgF, err);
+  if (edit && edit.src === "demo") { paneBox.hidden = true; }
+  show(mode);
+  dialog({ title: edit ? "Modifica playlist" : "Aggiungi playlist", wide: true, body, actions: [
+    { label: "Annulla" },
+    { label: edit ? "Salva" : "Aggiungi", primary: true, run: async () => {
+      err.hidden = true;
+      const fail = m => { err.textContent = m; err.hidden = false; return false; };
+      const rec = edit ? Object.assign({}, edit) : { id: "p" + Date.now().toString(36) + Math.random().toString(36).slice(2, 6), created: Date.now() };
+      rec.epgUrl = epg.value.trim();
+      let text = rec.text || "";
+      try {
+        if (edit && edit.src === "demo") { /* solo nome e guida */ }
+        else if (mode === "url") {
+          const u = url.value.trim(); if (!/^https?:\/\/\S+$/i.test(u)) return fail("Scrivi un indirizzo che inizi con http:// o https://");
+          if (!edit || u !== edit.url || !text) { busy(1); try { text = await fetchText(u); } catch (e) { return fail(friendlyFetchError(u, e)); } finally { busy(-1); } }
+          Object.assign(rec, { src: "url", url: u, updated: Date.now() }); delete rec.xt;
+          if (!name.value.trim()) name.value = nameFromUrl(u) + (/\.m3u8?$/i.test(new URL(u).pathname) ? "" : ".m3u");
+        } else if (mode === "file") {
+          const f = file.files && file.files[0]; if (!f) { if (edit && text) { /* resta il contenuto attuale */ } else return fail("Scegli un file .m3u"); }
+          else { text = await f.text(); if (!name.value.trim()) name.value = f.name; }
+          Object.assign(rec, { src: "file", url: "", updated: Date.now() }); delete rec.xt;
+        } else if (mode === "text") {
+          if (txt.value.trim()) text = txt.value; else if (!(edit && text)) return fail("Incolla il contenuto della playlist");
+          Object.assign(rec, { src: "text", url: "", updated: Date.now() }); delete rec.xt;
+          if (!name.value.trim()) name.value = "Playlist incollata";
+        } else {
+          const s = xs.value.trim().replace(/\/+$/, ""), us = xu.value.trim(), pw = xp.value;
+          if (!/^https?:\/\/\S+$/i.test(s)) return fail("Scrivi l'indirizzo del server, ad esempio http://server.it:8080");
+          if (!us || !pw) return fail("Servono nome utente e password");
+          const q = "username=" + encodeURIComponent(us) + "&password=" + encodeURIComponent(pw);
+          const u = s + "/get.php?" + q + "&type=m3u_plus&output=" + (IS_IOS ? "m3u8" : "ts");
+          busy(1); try { text = await fetchText(u); } catch (e) { return fail(friendlyFetchError(u, e)); } finally { busy(-1); }
+          Object.assign(rec, { src: "xtream", url: u, xt: { s, u: us, p: pw }, epgUrl: s + "/xmltv.php?" + q, updated: Date.now() });
+          if (!name.value.trim()) name.value = new URL(s).hostname;
+        }
+      } catch (e) { return fail("Qualcosa non va: " + (e.message || e)); }
+      const parsed = parseM3U(text, rec.url);
+      if (!parsed.channels.length) return fail("Non ho trovato canali: il contenuto non sembra una playlist M3U.");
+      rec.name = name.value.trim() || rec.name || "Playlist"; rec.text = text; rec.count = parsed.channels.length; rec.epgAuto = parsed.epg;
+      await DB.put("playlists", rec); await refreshPlaylistsList();
+      if (edit && edit.epgUrl !== rec.epgUrl) await DB.del("epg", rec.id);
+      selectPlaylist(S.pls.find(p => p.id === rec.id) || rec, { fresh: true });
+      toast((edit ? "Playlist salvata: " : "Playlist aggiunta: ") + rec.count + " canali");
+    } },
+  ] });
+}
+
+// ======================= foglio del canale =======================
+function channelSheet(ch) {
+  const x = nowNext(ch);
+  const head = h("div", { class: "sh-head" }, avatar(ch), h("div", { class: "tx" }, h("b", { text: ch.name }), h("small", { text: x && x.now ? "Ora: " + x.now.t : ch.group || S.pl.name })));
+  const items = [
+    { icon: "play", label: "Guarda", run: () => openChannel(ch, true) },
+    { icon: isFav(ch) ? "star" : "starO", label: isFav(ch) ? "Togli dai preferiti" : "Aggiungi ai preferiti", run: () => toggleFav(ch) },
+  ];
+  if (S.epg[ch.key] && S.epg[ch.key].length) items.push({ icon: "guide", label: "Guida TV", run: () => guideSheet(ch) });
+  items.push({ icon: "ext", label: "Apri in un'altra app (VLC…)", run: () => openExternal(ch) });
+  if (Cast.ready) items.push({ icon: "cast", label: "Trasmetti alla TV", run: () => castChannel(ch) });
+  items.push({ icon: "copy", label: "Copia indirizzo del canale", run: () => copyText(ch.url) });
+  sheet(head, items);
+}
+function guideSheet(ch) {
+  const L = S.epg[ch.key] || [], t = Date.now(), ul = h("ul", { class: "guide" });
+  let cur = null;
+  for (const p of L) { if (p.e < t - 3600e3) continue; const li = h("li", { class: p.s <= t && p.e > t ? "now" : "" }, h("time", { text: hm(p.s) }), h("div", {}, h("b", { text: p.t }), p.d ? h("p", { text: p.d }) : null)); if (li.className) cur = li; ul.append(li); }
+  if (!ul.children.length) ul.append(h("li", {}, h("time", { text: "" }), h("div", {}, h("b", { text: "Nessun programma nelle prossime ore" }))));
+  sheet(h("div", { class: "sh-head" }, avatar(ch), h("div", { class: "tx" }, h("b", { text: ch.name }), h("small", { text: "Guida TV" }))), [{ node: ul }]);
+  if (cur) setTimeout(() => cur.scrollIntoView({ block: "center" }), 60);
+}
+
+// ======================= app esterne =======================
+function externalHref(ch) {
+  const m = /^(https?):\/\/(.+)$/i.exec(ch.url);
+  if (IS_ANDROID && m) return "intent://" + m[2] + "#Intent;scheme=" + m[1].toLowerCase() + ";type=video/*;S.title=" + encodeURIComponent(ch.name) + ";end";
+  if (IS_IOS) return "vlc-x-callback://x-callback-url/stream?url=" + encodeURIComponent(ch.url);
+  return null;
+}
+function openExternal(ch) {
+  const href = externalHref(ch);
+  if (href) { const a = h("a", { href, rel: "noopener" }); document.body.append(a); a.click(); a.remove(); return; }
+  const m3u = "#EXTM3U\n#EXTINF:-1," + ch.name + "\n" + ch.url + "\n";
+  let dl = null;
+  try { dl = h("a", { class: "btn text", href: URL.createObjectURL(new Blob([m3u], { type: "audio/x-mpegurl" })), download: ch.name.replace(/[\\/:*?"<>|]+/g, "_") + ".m3u", style: "display:inline-flex;align-items:center;text-decoration:none" }, "Scarica .m3u"); } catch (e) {}
+  const link = h("input", { id: "extUrl", type: "text", readonly: true, value: ch.url, onfocus: e => e.target.select() });
+  dialog({ title: "Apri in un'altra app", body: [h("p", { text: "Sul computer copia l'indirizzo e aprilo in VLC (Media → Apri flusso di rete), oppure scarica il file .m3u e aprilo con un doppio clic." }), field("Indirizzo del canale", link)], actions: [
+    ...(dl ? [{ label: "Scarica .m3u", run: () => { dl.click(); } }] : []),
+    { label: "Copia", primary: true, run: () => copyText(ch.url) },
+  ] });
+}
+
+// ======================= trasmissione (Google Cast) =======================
+const Cast = { ready: false, ctx: null };
+function initCast() {
+  if (FRAMED || IS_IOS || !/Chrome\//.test(UA) || !window.isSecureContext) return;
+  window.__onGCastApiAvailable = ok => {
+    if (!ok || !window.cast || !cast.framework) return;
+    try {
+      const ctx = cast.framework.CastContext.getInstance();
+      ctx.setOptions({ receiverApplicationId: chrome.cast.media.DEFAULT_MEDIA_RECEIVER_APP_ID, autoJoinPolicy: chrome.cast.AutoJoinPolicy.ORIGIN_SCOPED });
+      Cast.ctx = ctx;
+      const upd = () => { const st = ctx.getCastState(); Cast.ready = st !== cast.framework.CastState.NO_DEVICES_AVAILABLE; $("btnCast").hidden = !Cast.ready; $("pCast").hidden = !Cast.ready; $("btnCast").style.color = st === cast.framework.CastState.CONNECTED ? "#9cc3ff" : ""; };
+      ctx.addEventListener(cast.framework.CastContextEventType.CAST_STATE_CHANGED, upd); upd();
+      ctx.addEventListener(cast.framework.CastContextEventType.SESSION_STATE_CHANGED, e => { if (e.sessionState === cast.framework.SessionState.SESSION_ENDED) { $("pCastInfo").hidden = true; } });
+    } catch (e) { console.warn("Cast non disponibile", e); }
+  };
+  loadScript("https://www.gstatic.com/cv/js/sender/v1/cast_sender.js?loadCastFramework=1").catch(() => {});
+}
+function castType(u) { const p = u.split("?")[0].toLowerCase(); return /\.m3u8?$/.test(p) ? "application/x-mpegURL" : /\.mp4$/.test(p) ? "video/mp4" : /\.mpd$/.test(p) ? "application/dash+xml" : /\.ts$/.test(p) ? "video/mp2t" : "application/x-mpegURL"; }
+async function castChannel(ch) {
+  if (!Cast.ctx) return;
+  try { if (!Cast.ctx.getCurrentSession()) await Cast.ctx.requestSession(); } catch (e) { return; }
+  const s = Cast.ctx.getCurrentSession(); if (!s) return;
+  const mi = new chrome.cast.media.MediaInfo(ch.url, castType(ch.url));
+  const md = new chrome.cast.media.GenericMediaMetadata(); md.title = ch.name; md.subtitle = ch.group || S.pl.name; if (ch.logo && /^https:/.test(ch.logo)) md.images = [new chrome.cast.Image(ch.logo)];
+  mi.metadata = md; mi.streamType = /\.mp4($|\?)/i.test(ch.url) ? chrome.cast.media.StreamType.BUFFERED : chrome.cast.media.StreamType.LIVE;
+  try {
+    await s.loadMedia(new chrome.cast.media.LoadRequest(mi));
+    const dev = (s.getCastDevice() || {}).friendlyName || "TV"; toast("In onda su " + dev); addRecent(ch);
+    if (!$("player").hidden && P.ch === ch) { stopEngines(); $("pCastInfo").hidden = false; $("pCastInfo").replaceChildren(h("div", {}, icon("cast"), h("div", { text: "In onda su " + dev }))); }
+  } catch (e) { toast("La TV non riesce ad aprire questo canale"); }
+}
+
+// ======================= lettore =======================
+const P = { list: [], idx: -1, ch: null, token: 0, hls: null, ts: null, dash: null, started: false, layer: null, hideT: 0, wake: null, retried: false, seeking: false };
+const video = $("video");
+function openChannel(ch, forceInternal) {
+  if (CFG.player === "external" && !forceInternal && externalHref(ch)) { addRecent(ch); openExternal(ch); return; }
+  const L = S.list.length && S.list.includes(ch) ? S.list : S.chans;
+  openPlayer(L, L.indexOf(ch));
+}
+function openPlayer(list, idx) {
+  P.list = list;
+  if ($("player").hidden) {
+    $("player").hidden = false; document.body.style.overflow = "hidden";
+    P.layer = pushLayer(closePlayerNow);
+    try { navigator.wakeLock && navigator.wakeLock.request("screen").then(w => { P.wake = w; }, () => {}); } catch (e) {}
+  }
+  playIdx(idx);
+}
+function closePlayer() { if (P.layer) closeLayer(P.layer); else closePlayerNow(); }
+function closePlayerNow() {
+  P.token++; stopEngines(); $("player").hidden = true; hideMsg(); $("pCastInfo").hidden = true; P.layer = null;
+  try { if (document.fullscreenElement) document.exitFullscreen(); } catch (e) {}
+  try { if (P.wake) P.wake.release(); } catch (e) {} P.wake = null;
+  try { if (document.pictureInPictureElement) document.exitPictureInPicture(); } catch (e) {}
+}
+function stopEngines() {
+  if (P.hls) { try { P.hls.destroy(); } catch (e) {} P.hls = null; }
+  if (P.ts) { try { P.ts.pause(); P.ts.unload(); P.ts.detachMediaElement(); P.ts.destroy(); } catch (e) {} P.ts = null; }
+  if (P.dash) { try { P.dash.reset(); } catch (e) {} P.dash = null; }
+  try { video.pause(); video.removeAttribute("src"); video.load(); } catch (e) {}
+}
+function zap(d) {
+  if (!P.list.length) return; const n = P.list.length; const i = ((P.idx + d) % n + n) % n;
+  const z = $("pZap"); z.textContent = P.list[i].name; z.hidden = false; clearTimeout(z._t); z._t = setTimeout(() => { z.hidden = true; }, 1600);
+  playIdx(i);
+}
+function kindOf(url) {
+  const p = url.split(/[?#]/)[0].toLowerCase();
+  if (/\.m3u8?$/.test(p) || /\/hls\//.test(p) || /[?&](type|format|output)=(m3u8|hls)/i.test(url)) return "hls";
+  if (/\.ts$/.test(p) || /\/live\/[^/]+\/[^/]+\/\d+$/.test(p)) return "ts";
+  if (/\.flv$/.test(p)) return "flv";
+  if (/\.mpd$/.test(p) || /\/manifest\(format=mpd/.test(p)) return "dash";
+  if (/\.(mp4|m4v|webm|mkv|mov|mp3|aac|m4a|ogg|oga|opus|wav)$/.test(p)) return "file";
+  return "unknown";
+}
+function plan(url) {
+  const k = kindOf(url), mse = !!(window.MediaSource || window.ManagedMediaSource), natHls = !!video.canPlayType("application/vnd.apple.mpegurl");
+  const proxied = !!(CFG.proxy.trim() && (CFG.proxyVideo || isMixed(url)));
+  const u = proxied ? url : isMixed(url) ? url.replace(/^http:/i, "https:") : url;
+  const steps = [];
+  const hlsStep = x => mse ? { e: "hls", url: x } : natHls ? { e: "native", url: proxied ? proxify(x) : x } : null;
+  if (k === "hls") steps.push(hlsStep(u), natHls && mse ? { e: "native", url: proxied ? proxify(u) : u } : null);
+  else if (k === "ts") steps.push(mse ? { e: "ts", url: proxied ? proxify(u) : u } : null, hlsStep(u.replace(/\.ts(\?|$)/i, ".m3u8$1").replace(/(\/live\/[^/]+\/[^/]+\/\d+)$/i, "$1.m3u8")));
+  else if (k === "flv") steps.push(mse ? { e: "flv", url: proxied ? proxify(u) : u } : null);
+  else if (k === "dash") steps.push(mse ? { e: "dash", url: proxied ? proxify(u) : u } : null);
+  else if (k === "file") steps.push({ e: "native", url: proxied ? proxify(u) : u });
+  else steps.push(hlsStep(u), mse ? { e: "ts", url: proxied ? proxify(u) : u } : null, { e: "native", url: proxied ? proxify(u) : u });
+  return { steps: steps.filter(Boolean), proxied, live: k !== "file" };
+}
+async function playIdx(idx) {
+  const ch = P.list[idx]; if (!ch) return;
+  P.idx = idx; P.ch = ch; P.started = false; P.retried = false; const token = ++P.token;
+  addRecent(ch); updatePlayerInfo(); hideMsg(); $("pCastInfo").hidden = true; showUi(true);
+  stopEngines(); spin(true); setIcon($("pPlay"), "pause");
+  if ("mediaSession" in navigator) try {
+    navigator.mediaSession.metadata = new MediaMetadata({ title: ch.name, artist: ch.group || S.pl.name, artwork: ch.logo && /^https:/.test(ch.logo) ? [{ src: ch.logo, sizes: "512x512" }] : [] });
+    navigator.mediaSession.setActionHandler("previoustrack", () => zap(-1)); navigator.mediaSession.setActionHandler("nexttrack", () => zap(1));
+  } catch (e) {}
+  // tra i tentativi falliti si mostra il motivo piu' utile (es. «errore 404» invece di «formato non supportato»)
+  const pl = plan(ch.url); let lastErr = null; const RANK = { http: 6, drm: 5, mixed: 4, network: 3, timeout: 2, format: 1, unknown: 0 };
+  if (!pl.steps.length) { spin(false); return showError({ kind: "format" }, ch); }
+  for (const st of pl.steps) {
+    if (token !== P.token) return;
+    try { await attempt(st, token, pl.proxied); if (token === P.token) { P.started = true; spin(false); updateSeek(); } return; }
+    catch (e) { if (token !== P.token) return; if (!lastErr || (RANK[e && e.kind] ?? 0) >= (RANK[lastErr.kind] ?? 0)) lastErr = e; stopEngines(); }
+  }
+  spin(false); showError(lastErr || { kind: "unknown" }, ch);
+}
+function attempt(st, token, proxied) {
+  return new Promise(async (res, rej) => {
+    let done = false;
+    const ok = () => { if (done) return; done = true; cleanup(); res(); };
+    const ko = e => { if (done) return; done = true; cleanup(); rej(e); };
+    const onLoaded = () => { const p = video.play(); if (p && p.catch) p.catch(err => { if (err && err.name === "NotAllowedError") { setIcon($("pPlay"), "play"); showUi(true); ok(); } }); };
+    const onPlaying = () => ok();
+    const onErr = () => ko(classifyMedia(video.error, st.url));
+    const tm = setTimeout(() => ko({ kind: "timeout" }), 25000);
+    function cleanup() { clearTimeout(tm); video.removeEventListener("loadeddata", onLoaded); video.removeEventListener("playing", onPlaying); video.removeEventListener("error", onErr); }
+    video.addEventListener("loadeddata", onLoaded); video.addEventListener("playing", onPlaying); video.addEventListener("error", onErr);
+    try {
+      if (st.e === "hls") {
+        await loadScript(LIB.hls); if (token !== P.token) return ko({ kind: "stale" });
+        if (!window.Hls || !Hls.isSupported()) return ko({ kind: "format" });
+        const hls = new Hls({ enableWorker: true, backBufferLength: 30, manifestLoadingMaxRetry: 1, levelLoadingMaxRetry: 2, fragLoadingMaxRetry: 3, xhrSetup: proxied ? (xhr, u) => { xhr.open("GET", proxify(u), true); } : undefined });
+        P.hls = hls;
+        hls.on(Hls.Events.ERROR, (_, d) => {
+          if (!d.fatal) return;
+          if (!P.started) return ko(classifyHls(d, st.url));
+          if (d.type === Hls.ErrorTypes.MEDIA_ERROR && !P.retried) { P.retried = true; hls.recoverMediaError(); return; }
+          if (d.type === Hls.ErrorTypes.NETWORK_ERROR && !P.retried) { P.retried = true; setTimeout(() => { if (P.hls === hls) hls.startLoad(); }, 2000); return; }
+          showError(classifyHls(d, st.url), P.ch);
+        });
+        hls.loadSource(st.url); hls.attachMedia(video);
+      } else if (st.e === "dash") {
+        await loadScript(LIB.dash); if (token !== P.token) return ko({ kind: "stale" });
+        if (!window.dashjs) return ko({ kind: "format" });
+        const dp = dashjs.MediaPlayer().create(); P.dash = dp;
+        dp.updateSettings({ streaming: { delay: { liveDelayFragmentCount: 3 }, retryAttempts: { MPD: 1 } } });
+        dp.on(dashjs.MediaPlayer.events.ERROR, ev => {
+          const er = ev && ev.error || {}, msg = String(er.message || "");
+          const e = /protection|key|drm|license/i.test(msg) || er.code === 110 ? { kind: "drm" } : /download|manifest|xhr|load/i.test(msg) || (er.code >= 10 && er.code < 40) ? (isMixed(st.url) ? { kind: "mixed" } : { kind: "network" }) : { kind: "format" };
+          if (!P.started) ko(e); else showError(e, P.ch);
+        });
+        dp.initialize(video, st.url, true);
+      } else if (st.e === "ts" || st.e === "flv") {
+        await loadScript(LIB.ts); if (token !== P.token) return ko({ kind: "stale" });
+        const M = window.mpegts; if (!M || !M.isSupported()) return ko({ kind: "format" });
+        const p = M.createPlayer({ type: st.e === "flv" ? "flv" : "mpegts", isLive: true, url: st.url }, { enableWorker: true, lazyLoad: false, liveBufferLatencyChasing: true, liveBufferLatencyMaxLatency: 8 });
+        P.ts = p;
+        p.on(M.Events.ERROR, (type, detail, info) => {
+          const e = { kind: type === M.ErrorTypes.NETWORK_ERROR ? (info && info.code >= 400 ? "http" : isMixed(st.url) ? "mixed" : "network") : "format", code: info && info.code };
+          if (!P.started) ko(e); else showError(e, P.ch);
+        });
+        p.attachMediaElement(video); p.load();
+      } else {
+        video.src = st.url; video.load();
+      }
+    } catch (e) { ko({ kind: "unknown", msg: e && e.message }); }
+  });
+}
+function classifyMedia(err, url) {
+  if (isMixed(url)) return { kind: "mixed" };
+  if (!err) return { kind: "unknown" };
+  if (err.code === 4) return { kind: "format" };
+  if (err.code === 2) return { kind: "network" };
+  return { kind: "unknown", msg: err.message };
+}
+function classifyHls(d, url) {
+  const code = d.response && d.response.code;
+  if (d.type === "networkError") { if (code >= 400) return { kind: "http", code }; if (isMixed(url) || isMixed(d.url || "")) return { kind: "mixed" }; return { kind: "network" }; }
+  if (d.type === "mediaError") return { kind: "format" };
+  return { kind: "unknown", msg: d.details };
+}
+function spin(on) { $("pSpin").hidden = !on; }
+function hideMsg() { $("pMsg").hidden = true; $("player").classList.remove("has-msg"); }
+function showError(e, ch) {
+  spin(false); if (!ch || ch !== P.ch) return;
+  const T = {
+    mixed: ["Canale bloccato dal browser", "Il canale usa un indirizzo http e questa pagina è https, quindi il browser non lo carica. Aprilo in un'altra app (come VLC) oppure imposta un proxy https nelle impostazioni."],
+    network: ["Il canale non risponde", "Il server del canale non è raggiungibile o non permette la visione da un sito web. Può funzionare in un'altra app (come VLC) o con un proxy."],
+    http: ["Il server ha rifiutato il canale", "Errore " + (e.code || "") + ": il canale potrebbe essere offline, cambiato di indirizzo o riservato agli abbonati."],
+    drm: ["Canale protetto", "Questo canale è cifrato (DRM) e può essere visto solo nell'app ufficiale dell'emittente."],
+    format: ["Formato non supportato", "Questo browser non riesce a decodificare il canale. Prova ad aprirlo in un'altra app."],
+    timeout: ["Il canale non parte", "Dopo 25 secondi non è arrivato nessun video. Il canale potrebbe essere offline o molto lento."],
+    unknown: ["Impossibile riprodurre il canale", "Riprova tra poco oppure aprilo in un'altra app."],
+  }[e.kind] || ["Impossibile riprodurre il canale", "Riprova tra poco oppure aprilo in un'altra app."];
+  let extra = FRAMED && (e.kind === "network" || e.kind === "unknown" || e.kind === "timeout") ? " Nell'anteprima dentro un'altra pagina (come claude.ai) i video esterni possono essere bloccati: apri l'app dal suo indirizzo." : "";
+  const box = h("div", { class: "box" }, icon("error"), h("h3", { text: T[0] }), h("p", { text: T[1] + extra }),
+    h("div", { class: "acts" },
+      h("button", { class: "btn primary", type: "button", onclick: () => playIdx(P.idx) }, "Riprova"),
+      h("button", { class: "btn", type: "button", onclick: () => openExternal(ch) }, "Apri in un'altra app"),
+      P.list.length > 1 ? h("button", { class: "btn", type: "button", onclick: () => zap(1) }, "Canale successivo") : null));
+  $("pMsg").replaceChildren(box); $("pMsg").hidden = false; $("player").classList.add("has-msg"); showUi(true);
+}
+function updatePlayerInfo() {
+  const ch = P.ch; if (!ch) return;
+  $("pName").textContent = ch.name; $("pSub").textContent = [ch.group, S.pl && S.pl.name].filter(Boolean).join(" · ");
+  setIcon($("pFav"), isFav(ch) ? "star" : "starO"); $("pFav").style.color = isFav(ch) ? "var(--star)" : "";
+  $("pFav").setAttribute("aria-label", isFav(ch) ? "Togli dai preferiti" : "Aggiungi ai preferiti");
+  const box = $("pEpg"); box.replaceChildren(); const x = nowNext(ch);
+  if (x && x.now) { box.append(h("div", { class: "now", text: hm(x.now.s) + " " + x.now.t }), h("div", { class: "pb" }, h("i", { style: "width:" + Math.round(x.pct * 100) + "%" }))); if (x.next) box.append(h("div", { class: "next", text: "Dopo: " + hm(x.next.s) + " " + x.next.t })); }
+  else if (x && x.next) box.append(h("div", { class: "next", text: "Alle " + hm(x.next.s) + ": " + x.next.t }));
+  else if (plan(ch.url).live) box.append(h("div", { class: "p-live", text: "DIRETTA" }));
+}
+function updateSeek() {
+  const d = video.duration, show = !!P.ch && isFinite(d) && d > 0 && kindOf(P.ch.url) !== "ts";
+  $("pSeek").hidden = !show; if (!show) return;
+  $("pDur").textContent = dur(d); $("pCur").textContent = dur(video.currentTime);
+  if (!P.seeking) $("pRange").value = String(Math.round(video.currentTime / d * 1000));
+}
+video.addEventListener("timeupdate", () => { if (!$("pSeek").hidden || isFinite(video.duration)) updateSeek(); });
+video.addEventListener("durationchange", updateSeek);
+video.addEventListener("waiting", () => { if (P.started) spin(true); });
+video.addEventListener("playing", () => { spin(false); setIcon($("pPlay"), "pause"); scheduleHide(); });
+video.addEventListener("pause", () => { setIcon($("pPlay"), "play"); showUi(true); });
+video.addEventListener("volumechange", () => setIcon($("pMute"), video.muted ? "volX" : "vol"));
+$("pRange").addEventListener("input", () => { P.seeking = true; const d = video.duration; if (isFinite(d)) $("pCur").textContent = dur($("pRange").value / 1000 * d); showUi(); });
+$("pRange").addEventListener("change", () => { const d = video.duration; if (isFinite(d)) video.currentTime = $("pRange").value / 1000 * d; P.seeking = false; });
+function showUi(sticky) { $("pUi").classList.add("show"); clearTimeout(P.hideT); if (!sticky) scheduleHide(); }
+function scheduleHide() { clearTimeout(P.hideT); P.hideT = setTimeout(() => { if (!video.paused && $("pMsg").hidden) $("pUi").classList.remove("show"); }, 3500); }
+function togglePlay() { if (video.paused) { const p = video.play(); if (p && p.catch) p.catch(() => {}); } else video.pause(); }
+const FITS = ["contain", "cover", "fill"], FIT_LABEL = { contain: "Adatta", cover: "Riempi (ritaglia)", fill: "Allunga" };
+let fit = store.get("fit", "contain");
+function applyFit() { const pl = $("player"); pl.classList.toggle("fit-cover", fit === "cover"); pl.classList.toggle("fit-fill", fit === "fill"); }
+async function toggleFull() {
+  const pl = $("player");
+  try {
+    if (document.fullscreenElement || document.webkitFullscreenElement) { await (document.exitFullscreen || document.webkitExitFullscreen).call(document); return; }
+    if (pl.requestFullscreen) { await pl.requestFullscreen({ navigationUI: "hide" }); try { await screen.orientation.lock("landscape"); } catch (e) {} }
+    else if (pl.webkitRequestFullscreen) pl.webkitRequestFullscreen();
+    else if (video.webkitEnterFullscreen) video.webkitEnterFullscreen();
+  } catch (e) { if (video.webkitEnterFullscreen) try { video.webkitEnterFullscreen(); } catch (x) {} }
+}
+document.addEventListener("fullscreenchange", () => setIcon($("pFull"), document.fullscreenElement ? "fullX" : "full"));
+(() => {   // comandi del lettore
+  setIcon($("pBack"), "back"); setIcon($("pPrev"), "prev"); setIcon($("pNext"), "next"); setIcon($("pPlay"), "pause"); setIcon($("pExt"), "ext");
+  setIcon($("pCast"), "cast"); setIcon($("pPip"), "pip"); setIcon($("pMute"), "vol"); setIcon($("pFit"), "aspect"); setIcon($("pFull"), "full");
+  $("pPip").hidden = !(document.pictureInPictureEnabled && video.requestPictureInPicture);
+  applyFit();
+  const on = (id, fn) => $(id).addEventListener("click", e => { e.stopPropagation(); fn(); showUi(); });
+  on("pBack", closePlayer); on("pPrev", () => zap(-1)); on("pNext", () => zap(1)); on("pPlay", togglePlay);
+  on("pFav", () => toggleFav(P.ch)); on("pExt", () => { video.pause(); openExternal(P.ch); }); on("pCast", () => castChannel(P.ch));
+  on("pPip", () => { try { document.pictureInPictureElement ? document.exitPictureInPicture() : video.requestPictureInPicture().catch(() => toast("Picture in picture non disponibile")); } catch (e) {} });
+  on("pMute", () => { video.muted = !video.muted; });
+  on("pFit", () => { fit = FITS[(FITS.indexOf(fit) + 1) % FITS.length]; store.set("fit", fit); applyFit(); toast("Formato: " + FIT_LABEL[fit], 1400); });
+  on("pFull", toggleFull);
+  const pl = $("player"); let sx = 0, sy = 0, st = 0, moved = false;
+  pl.addEventListener("touchstart", e => { if (e.target.closest("button,input")) return; sx = e.touches[0].clientX; sy = e.touches[0].clientY; st = Date.now(); moved = false; }, { passive: true });
+  pl.addEventListener("touchend", e => {
+    if (e.target.closest("button,input") || !st) return; const t = e.changedTouches[0], dx = t.clientX - sx, dy = t.clientY - sy; st = 0;
+    if (Math.abs(dy) > 70 && Math.abs(dx) < 60) { moved = true; zap(dy < 0 ? 1 : -1); }   // scorri in su: canale successivo
+  }, { passive: true });
+  let lastTap = 0;
+  pl.addEventListener("click", e => {
+    if (e.target.closest("button,input,.p-msg .box")) return; if (moved) { moved = false; return; }
+    const now = Date.now(); if (now - lastTap < 300) { toggleFull(); lastTap = 0; return; } lastTap = now;
+    const ui = $("pUi"); if (ui.classList.contains("show") && !video.paused) { ui.classList.remove("show"); clearTimeout(P.hideT); } else showUi();
+  });
+  pl.addEventListener("mousemove", () => { if (matchMedia("(hover: hover)").matches) showUi(); });
+})();
+function resumeLast() {
+  const last = store.get("last", null); if (!last || !S.pl || last.pl !== S.pl.id) return;
+  const ch = byKey().get(last.key); if (ch) openPlayer(S.chans, S.chans.indexOf(ch));
+}
+
+// ======================= impostazioni e guida =======================
+function swRow(id, title, sub, checked, onChange) {
+  const inp = h("input", { id, type: "checkbox", role: "switch" }); inp.checked = !!checked; inp.addEventListener("change", () => onChange(inp.checked));
+  return h("label", { class: "sw", for: id }, h("span", { class: "tx" }, h("b", { text: title }), sub ? h("small", { text: sub }) : null), inp);
+}
+function segRow(id, label, opts, val, onChange) {
+  const seg = h("div", { class: "seg", role: "group", "aria-label": label, id });
+  for (const [v, l] of opts) seg.append(h("button", { type: "button", "aria-pressed": String(v === val), onclick: e => { for (const b of seg.children) b.setAttribute("aria-pressed", String(b === e.currentTarget)); onChange(v); } }, l));
+  return h("div", { class: "fld" }, h("label", { text: label }), seg);
+}
+function settingsDialog() {
+  const set = (k, v, rerender) => { CFG[k] = v; saveCfg(); applyCfg(); if (rerender) render(true); };
+  const proxy = h("input", { id: "cfgProxy", type: "url", inputmode: "url", placeholder: "https://tuo-proxy.workers.dev/?key=…&url=", value: CFG.proxy });
+  proxy.addEventListener("change", () => set("proxy", proxy.value.trim()));
+  const body = [
+    h("div", { class: "set-sec", text: "Aspetto" }),
+    segRow("cfgView", "Vista dei canali", [["grid", "Griglia"], ["rows", "Elenco"]], CFG.view, v => set("view", v, true)),
+    segRow("cfgTile", "Dimensione dei riquadri", [["s", "Piccoli"], ["m", "Medi"], ["l", "Grandi"]], CFG.tile, v => set("tile", v, true)),
+    swRow("cfgLogos", "Mostra i loghi dei canali", "Se spento, si vede solo l'iniziale colorata.", CFG.logos, v => set("logos", v, true)),
+    h("div", { class: "set-sec", text: "Riproduzione" }),
+    swRow("cfgExt", "Apri i canali in un'altra app", IS_ANDROID ? "Il tocco su un canale apre VLC, MX Player o l'app che scegli." : IS_IOS ? "Il tocco su un canale apre VLC (se installato)." : "Disponibile su Android e iPhone. Sul computer resta il lettore interno.", CFG.player === "external", v => set("player", v ? "external" : "internal")),
+    swRow("cfgResume", "Riapri l'ultimo canale all'avvio", null, CFG.resume, v => set("resume", v)),
+    h("div", { class: "set-sec", text: "Playlist" }),
+    swRow("cfgAuto", "Aggiorna da sola le playlist con link", "Quando la apri, se è più vecchia di 24 ore.", CFG.autoRefresh, v => set("autoRefresh", v)),
+    h("div", { class: "set-sec", text: "Rete" }),
+    field("Proxy (facoltativo)", proxy, "Serve per i canali http su questa pagina https e per i server che bloccano i siti web (CORS). L'indirizzo del canale viene aggiunto in fondo, oppure al posto di {url}."),
+    swRow("cfgProxyVideo", "Usa il proxy anche per i video", "Se spento, il proxy serve solo per playlist, guida TV e canali http.", CFG.proxyVideo, v => set("proxyVideo", v)),
+    h("div", { class: "set-sec", text: "Dati" }),
+    h("div", { class: "chips" },
+      h("button", { class: "chip", type: "button", onclick: () => { if (!S.pl) return; S.recs = []; store.set("rec." + S.pl.id, []); if (S.tab === TAB_REC) render(true); toast("Recenti cancellati"); } }, "Cancella i recenti"),
+      h("button", { class: "chip", type: "button", onclick: async () => { const d = demoPlaylist(); await DB.put("playlists", d); await refreshPlaylistsList(); selectPlaylist(S.pls.find(p => p.id === "demo")); toast("Playlist di esempio ripristinata"); } }, "Ripristina l'esempio")),
+  ];
+  dialog({ title: "Impostazioni", wide: true, body, actions: [{ label: "Fatto", primary: true, run: () => { set("proxy", proxy.value.trim()); } }] });
+}
+function helpDialog() {
+  const li = (b, t) => h("li", {}, h("b", { text: b }), " " + t);
+  dialog({ title: "Guida e formati", wide: true, body: [
+    h("ul", { class: "help" },
+      li("Playlist:", "M3U e M3U8, da link, da file, incollate o con accesso Xtream Codes. Gruppi da group-title, loghi da tvg-logo."),
+      li("Canali:", "HLS (.m3u8), DASH (.mpd, senza DRM), MPEG-TS (.ts, anche Xtream), FLV, MP4 e audio."),
+      li("Guida TV:", "XMLTV, anche compressa .gz. Si collega ai canali con tvg-id o con il nome."),
+      li("Preferiti:", "tieni premuto un canale, oppure tocca la stella nel lettore."),
+      li("Nel lettore:", "scorri in su o in giù per cambiare canale, tocca due volte per lo schermo intero."),
+      li("Canali http:", "su una pagina https il browser li blocca. Si aprono in VLC con «Apri in un'altra app», oppure con un proxy https."),
+      li("Trasmetti:", "con Chrome compare il pulsante Cast quando c'è un Chromecast o una TV compatibile sulla stessa rete.")),
+    h("p", {}, "Tasti: ", h("kbd", { text: "↑" }), " ", h("kbd", { text: "↓" }), " cambia canale, ", h("kbd", { text: "Spazio" }), " pausa, ", h("kbd", { text: "F" }), " schermo intero, ", h("kbd", { text: "M" }), " audio, ", h("kbd", { text: "Esc" }), " chiude."),
+    h("p", { text: "Tivù Player non fornisce canali: riproduce le playlist che aggiungi tu. Usa solo contenuti che hai il diritto di guardare." }),
+  ], actions: [{ label: "Chiudi", primary: true }] });
+}
+
+// ======================= barra in alto, ricerca, tastiera =======================
+function moreMenu() {
+  const items = [];
+  if (S.pl && S.pl.url) items.push({ icon: "refresh", label: "Aggiorna playlist", run: () => refreshPlaylist(S.pl) });
+  if (S.pl && epgUrls(S.pl).length) items.push({ icon: "guide", label: "Aggiorna guida TV", run: () => loadEpg(S.pl, true) });
+  items.push({ icon: "add", label: "Aggiungi playlist", run: () => playlistDialog() });
+  items.push({ sep: true }, { label: "Ordina" });
+  items.push({ icon: "sort", label: "Come nella playlist", checked: CFG.sort === "orig", run: () => { CFG.sort = "orig"; saveCfg(); render(true); } });
+  items.push({ icon: "sort", label: "Per nome (A-Z)", checked: CFG.sort === "az", run: () => { CFG.sort = "az"; saveCfg(); render(true); } });
+  items.push({ sep: true }, { icon: "settings", label: "Impostazioni", run: settingsDialog });
+  popMenu(items);
+}
+let searchLayer = null, qT = 0;
+function openSearch() {
+  $("appbar").hidden = true; $("searchbar").hidden = false; $("tabs").hidden = true; $("q").value = S.q; setTimeout(() => $("q").focus(), 20);
+  searchLayer = pushLayer(() => { S.q = ""; $("q").value = ""; $("searchbar").hidden = true; $("appbar").hidden = false; $("tabs").hidden = false; searchLayer = null; render(true); });
+}
+$("q").addEventListener("input", () => { clearTimeout(qT); qT = setTimeout(() => { S.q = $("q").value.trim(); render(true); }, 120); });
+$("q").addEventListener("keydown", e => { if (e.key === "Enter") $("q").blur(); });
+(() => {
+  setIcon($("btnMenu"), "menu"); setIcon($("btnSearch"), "search"); setIcon($("btnCast"), "cast"); setIcon($("btnMore"), "more");
+  setIcon($("btnSearchBack"), "back"); setIcon($("btnSearchClear"), "close");
+  $("btnMenu").onclick = openDrawer; $("btnSearch").onclick = openSearch; $("btnMore").onclick = moreMenu;
+  $("btnSearchBack").onclick = () => closeLayer(searchLayer);
+  $("btnSearchClear").onclick = () => { $("q").value = ""; S.q = ""; render(true); $("q").focus(); };
+  $("btnView").onclick = () => { CFG.view = CFG.view === "grid" ? "rows" : "grid"; saveCfg(); applyCfg(); const top = $("main").scrollTop; render(true); $("main").scrollTop = top; };
+  $("btnCast").onclick = () => { if (Cast.ctx) { if (Cast.ctx.getCurrentSession()) Cast.ctx.endCurrentSession(true); else Cast.ctx.requestSession().catch(() => {}); } };
+})();
+document.addEventListener("keydown", e => {
+  if (e.target.closest && e.target.closest("input,textarea,select")) { if (e.key === "Escape") { const L = topLayer(); if (L) closeLayer(L); } return; }
+  if (!$("player").hidden && topLayer() === P.layer) {
+    const k = e.key;
+    if (k === "ArrowUp" || k === "PageUp" || k === "ChannelUp") { e.preventDefault(); zap(-1); }
+    else if (k === "ArrowDown" || k === "PageDown" || k === "ChannelDown") { e.preventDefault(); zap(1); }
+    else if (k === " " || k === "k" || k === "MediaPlayPause") { e.preventDefault(); togglePlay(); showUi(); }
+    else if (k === "f" || k === "F") toggleFull();
+    else if (k === "m" || k === "M") video.muted = !video.muted;
+    else if (k === "Escape" && !document.fullscreenElement) closePlayer();
+    else if (k === "ArrowLeft" || k === "ArrowRight") { if (isFinite(video.duration)) video.currentTime += k === "ArrowLeft" ? -10 : 10; showUi(); }
+    return;
+  }
+  if (e.key === "Escape") { const L = topLayer(); if (L) closeLayer(L); }
+  else if (e.key === "/" && !layers.length) { e.preventDefault(); openSearch(); }
+});
+
+// ======================= avvio =======================
+(async function boot() {
+  applyCfg();
+  await refreshPlaylistsList();
+  if (!S.pls.length && !store.get("seeded", false)) { await DB.put("playlists", demoPlaylist()); store.set("seeded", true); await refreshPlaylistsList(); }
+  const cur = store.get("cur", null), pl = S.pls.find(p => p.id === cur) || S.pls[0];
+  if (pl) await selectPlaylist(pl, { boot: true }); else { renderTabs(); render(true); }
+  initCast();
+  if (FRAMED) setStatus("Anteprima: dentro un'altra pagina (come claude.ai) i video e i loghi dei canali sono bloccati. Per guardare i canali apri l'app dal suo sito.");
+  if (!FRAMED && "serviceWorker" in navigator && window.isSecureContext && document.querySelector('link[rel="manifest"]')) navigator.serviceWorker.register("sw.js").catch(() => {});
+})();
+</script>
+
+</body>
+</html>
