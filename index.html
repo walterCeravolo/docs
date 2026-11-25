@@ -1214,6 +1214,18 @@ function missingTracks() {   // il canale ha una traccia che il browser ha salta
   return out.join(" e ");
 }
 const decChannels = () => new Set(store.get("decch", []));
+function altSources(ch) {
+  const id = (ch.tvgId || "").trim().toLowerCase(); if (!id) return [];
+  const seen = new Set([ch.url]); const out = [];
+  for (const c of S.chans || []) if (c !== ch && (c.tvgId || "").trim().toLowerCase() === id && !seen.has(c.url)) { seen.add(c.url); out.push(c); }
+  return out;
+}
+function altRemember(ch, alt) {
+  const m = store.get("altsrc") || {}; const cur = m[ch.key];
+  if (alt ? cur === alt.url : !cur) return;
+  if (alt) m[ch.key] = alt.url; else delete m[ch.key];
+  store.set("altsrc", m);
+}
 function decRemember(ch) { const s = decChannels(); if (!s.has(ch.key)) { s.add(ch.key); store.set("decch", [...s].slice(-200)); } }
 function note(t) { const n = $("pNote"); if (!n) return; n.textContent = t || ""; n.hidden = !t; }
 
@@ -1297,6 +1309,12 @@ async function playIdx(idx) {
   const decOk = !FRAMED && hlsLike && window.isSecureContext !== false;
   if (decOk && (P.forceDec === ch.key || decChannels().has(ch.key))) steps.unshift({ e: "hlsx", url: hlsLike });
   P.decErr = ""; P.decShown = false; P.decInfo = null;
+  // fonti alternative DELLA STESSA LISTA: altri canali con lo stesso tvg-id (es. Rai 1 -> «Rai 1 Europa», «Rai 1 Estero»).
+  // Si provano solo se l'indirizzo principale non parte; quella che ha funzionato si ricorda e si prova per prima.
+  const alts = altSources(ch), altMem = (store.get("altsrc") || {})[ch.key];
+  const altSteps = []; for (const c of alts) for (const x of plan(c.url).steps) altSteps.push(Object.assign({}, x, { alt: c }));
+  const memSteps = altSteps.filter(x => x.alt.url === altMem);
+  steps.unshift(...memSteps); steps.push(...altSteps.filter(x => x.alt.url !== altMem));
   for (let i = 0; i < steps.length; i++) {
     const st = steps[i];
     if (token !== P.token) return;
@@ -1311,7 +1329,9 @@ async function playIdx(idx) {
       }
       if (token === P.token) {
         P.started = true; spin(false); updateSeek();
-        if (st.e === "hlsx") { decRemember(ch); note("Decodificatore avanzato attivo" + (P.decInfo && P.decInfo.probe ? "" : "")); setTimeout(() => { if (P.token === token) note(""); }, 4000); } else note("");
+        altRemember(ch, st.alt);
+        if (st.alt) { note("Fonte alternativa dalla lista: " + st.alt.name); setTimeout(() => { if (P.token === token) note(""); }, 5000); }
+        else if (st.e === "hlsx") { decRemember(ch); note("Decodificatore avanzato attivo" + (P.decInfo && P.decInfo.probe ? "" : "")); setTimeout(() => { if (P.token === token) note(""); }, 4000); } else note("");
       }
       return;
     }
@@ -1319,7 +1339,8 @@ async function playIdx(idx) {
       if (token !== P.token) return;
       if (st.e === "hlsx" && P.decInfo) e.det = (e.det || "") + " · flussi: " + P.decInfo.probe;
       P.trace.push(Object.assign({ e: st.e, url: st.url }, e)); keep(e); stopEngines(); note("");
-      if (decOk && e.kind === "format" && (st.e === "hls" || st.e === "native") && !steps.some(x => x.e === "hlsx")) steps.splice(i + 1, 0, { e: "hlsx", url: hlsLike });
+      if (st.alt) { e.det = (e.det ? e.det + " · " : "") + "fonte alternativa «" + st.alt.name + "»"; P.trace[P.trace.length - 1].det = e.det; }
+      if (!FRAMED && window.isSecureContext !== false && e.kind === "format" && (st.e === "hls" || st.e === "native") && (st.alt || hlsLike) && !steps.some(x => x.e === "hlsx" && x.alt === st.alt)) steps.splice(i + 1, 0, { e: "hlsx", url: st.alt ? st.url : hlsLike, alt: st.alt });
     }
   }
   spin(false); showError(lastErr || { kind: "unknown" }, ch);
