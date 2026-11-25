@@ -1218,6 +1218,22 @@ function altSources(ch) {
   const id = (ch.tvgId || "").trim().toLowerCase(); if (!id) return [];
   const seen = new Set([ch.url]); const out = [];
   for (const c of S.chans || []) if (c !== ch && (c.tvgId || "").trim().toLowerCase() === id && !seen.has(c.url)) { seen.add(c.url); out.push(c); }
+  // fonti RICAVATE dalla lista: canali «fratelli» con lo stesso tvg-id ma un altro numero (Rai1.it per Rai2.it). Se il loro
+  // indirizzo contiene il nome del canale come parte del percorso (es. .../RAI1/Live.m3u8), si prova lo stesso server con
+  // il numero di questo canale (.../RAI2/Live.m3u8). Solo dopo le fonti dirette, e mai sui collegamenti Rai (relinker).
+  const m = id.match(/^([a-z]+)[ ._-]?(\d{1,2})(\..*)?$/);
+  if (m) {
+    const [, pre, num, suf = ""] = m;
+    for (const c of S.chans || []) {
+      const cm = (c.tvgId || "").trim().toLowerCase().match(/^([a-z]+)[ ._-]?(\d{1,2})(\..*)?$/);
+      if (!cm || cm[1] !== pre || cm[2] === num || (cm[3] || "") !== suf || /relinker|mediapolis/i.test(c.url)) continue;
+      const re = new RegExp("(/)(" + pre + "[ ._-]?)" + cm[2] + "(?=[/._-])", "ig");
+      if (!re.test(c.url)) continue;
+      const u = c.url.replace(re, (all, sl, p) => sl + p + num);
+      if (seen.has(u)) continue; seen.add(u);
+      out.push({ name: ch.name + " (dallo stesso server di «" + c.name + "»)", url: u, key: c.key + ">" + num, derived: true });
+    }
+  }
   return out;
 }
 function altRemember(ch, alt) {
